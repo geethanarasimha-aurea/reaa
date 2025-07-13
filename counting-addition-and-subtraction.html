@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fun Math Game for UKG Kids</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            background-color: #f0f9ff;
+            padding: 20px;
+            margin: 0;
+        }
+        .game-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #6b6bff;
+            margin-top: 0;
+        }
+        .game-area {
+            margin: 20px 0;
+        }
+        .game-mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .game-mode-btn {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #6b6bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .game-mode-btn.active {
+            background-color: #4a4ac4;
+            transform: scale(1.05);
+        }
+        .question {
+            font-size: 28px;
+            margin: 20px 0;
+            color: #2c3e50;
+            min-height: 40px;
+        }
+        .options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .option {
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffd166;
+            color: #2c3e50;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 4px solid transparent;
+        }
+        .option:hover {
+            transform: scale(1.1);
+            background-color: #ffb347;
+        }
+        .number-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #06d6a0;
+            margin: 10px 0;
+        }
+        .objects-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .object {
+            width: 40px;
+            height: 40px;
+            background-color: #ff9a8b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .object.highlighted {
+            background-color: #6b6bff;
+            transform: scale(1.2);
+        }
+        .object.to-remove {
+            background-color: #ef476f;
+            transform: scale(1.1);
+        }
+        .feedback {
+            font-size: 24px;
+            font-weight: bold;
+            min-height: 30px;
+            margin: 15px 0;
+        }
+        .correct {
+            color: #06d6a0;
+        }
+        .incorrect {
+            color: #ef476f;
+        }
+        .score {
+            font-size: 20px;
+            margin: 15px 0;
+            color: #6b6bff;
+        }
+        .next-btn {
+            padding: 12px 25px;
+            font-size: 18px;
+            background-color: #06d6a0;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .next-btn:hover {
+            background-color: #04b389;
+            transform: scale(1.05);
+        }
+        .hint-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #6b6bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px 0;
+        }
+        .hint-btn:hover {
+            background-color: #4a4ac4;
+            transform: scale(1.05);
+        }
+        .celebration {
+            position: fixed;
+            font-size: 30px;
+            z-index: 10;
+            animation: fall 3s linear forwards;
+            pointer-events: none;
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        .sound-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .number-speak-btn {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background-color: #6b6bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        /* Subtraction specific styles */
+        @keyframes fall-away {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100px) rotate(30deg);
+                opacity: 0;
+            }
+        }
+        .falling {
+            animation: fall-away 0.5s ease-out forwards;
+            pointer-events: none;
+        }
+        .remove-btn {
+            padding: 8px 15px;
+            background-color: #06d6a0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .remove-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .math-symbol {
+            font-size: 32px;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sound-toggle" id="sound-toggle">🔊</div>
+    <div class="game-container">
+        <h1>UKG Math Fun</h1>
+        <p class="subtitle">Let's learn numbers 1 to 20!</p>
+        
+        <div class="game-mode-selector">
+            <button class="game-mode-btn active" data-mode="counting">Counting</button>
+            <button class="game-mode-btn" data-mode="addition">Addition</button>
+            <button class="game-mode-btn" data-mode="subtraction">Subtraction</button>
+        </div>
+        
+        <div class="score">Score: <span id="score">0</span></div>
+        
+        <div class="game-area">
+            <div class="question" id="question"></div>
+            <div class="number-display" id="number-display"></div>
+            <div class="objects-container" id="objects-container"></div>
+            <button class="hint-btn" id="hint-btn" style="display:none;">Show Hint</button>
+            <div class="options" id="options"></div>
+            <div class="feedback" id="feedback"></div>
+            <button class="number-speak-btn" id="speak-question-btn">Speak Question</button>
+        </div>
+        
+        <button class="next-btn" id="next-btn">Next Question</button>
+    </div>
+
+    <!-- Game sounds -->
+    <audio id="correct-sound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_d5d01bc031.mp3"></audio>
+    <audio id="wrong-sound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_39b5f497b1.mp3"></audio>
+    <audio id="celebration-sound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_d5d01bc031.mp3"></audio>
+
+    <script>
+        let score = 0;
+        let currentQuestion = {};
+        let selectedMode = "counting";
+        let soundEnabled = true;
+        let hintUsed = false;
+        let clickCount = 0;
+        
+        // DOM elements
+        const questionEl = document.getElementById('question');
+        const numberDisplayEl = document.getElementById('number-display');
+        const objectsContainerEl = document.getElementById('objects-container');
+        const optionsEl = document.getElementById('options');
+        const feedbackEl = document.getElementById('feedback');
+        const scoreEl = document.getElementById('score');
+        const nextBtn = document.getElementById('next-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const speakQuestionBtn = document.getElementById('speak-question-btn');
+        const gameModeBtns = document.querySelectorAll('.game-mode-btn');
+        const soundToggle = document.getElementById('sound-toggle');
+        const correctSound = document.getElementById('correct-sound');
+        const wrongSound = document.getElementById('wrong-sound');
+        const celebrationSound = document.getElementById('celebration-sound');
+
+        // Initialize game
+        function initGame() {
+            score = 0;
+            scoreEl.textContent = score;
+            generateQuestion();
+        }
+
+        // Speak text using Web Speech API
+        function speak(text) {
+            if (!soundEnabled) return;
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.8;
+            utterance.pitch = 1.2;
+            speechSynthesis.speak(utterance);
+        }
+
+        // Stop all sounds
+        function stopAllSounds() {
+            correctSound.pause();
+            correctSound.currentTime = 0;
+            wrongSound.pause();
+            wrongSound.currentTime = 0;
+            celebrationSound.pause();
+            celebrationSound.currentTime = 0;
+            speechSynthesis.cancel();
+        }
+
+        // Toggle sound
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundToggle.textContent = soundEnabled ? "🔊" : "🔇";
+            if (!soundEnabled) stopAllSounds();
+        });
+
+        // Create celebration effects
+        function createCelebration() {
+            const emojis = ['⭐', '❤️', '🌸', '🎉', '✨'];
+            const screenWidth = window.innerWidth;
+            
+            // Play celebration sound
+            if (soundEnabled) {
+                celebrationSound.play();
+            }
+            
+            for (let i = 0; i < 15; i++) {
+                const emoji = document.createElement('div');
+                emoji.className = 'celebration';
+                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                emoji.style.left = `${Math.random() * screenWidth}px`;
+                emoji.style.animationDuration = `${3 + Math.random() * 2}s`;
+                document.body.appendChild(emoji);
+                
+                setTimeout(() => {
+                    emoji.remove();
+                }, 5000);
+            }
+        }
+
+        // Generate a new question based on selected mode
+        function generateQuestion() {
+            clickCount = 0;
+            stopAllSounds();
+            hintUsed = false;
+            hintBtn.style.display = 'none';
+            
+            // Clear previous elements
+            objectsContainerEl.innerHTML = '';
+            optionsEl.innerHTML = '';
+            feedbackEl.textContent = '';
+            feedbackEl.className = 'feedback';
+            
+            if (selectedMode === "counting") {
+                generateCountingQuestion();
+            } else if (selectedMode === "addition") {
+                generateAdditionQuestion();
+                hintBtn.style.display = 'block';
+            } else if (selectedMode === "subtraction") {
+                generateSubtractionQuestion();
+                hintBtn.style.display = 'block';
+            }
+            
+            // Speak the question after a short delay
+            setTimeout(() => {
+                speakQuestion();
+            }, 500);
+        }
+
+        // Speak the current question
+        function speakQuestion() {
+            if (!soundEnabled) return;
+            
+            let textToSpeak = "";
+            
+            if (selectedMode === "counting") {
+                textToSpeak = "How many objects do you see?";
+            } else if (selectedMode === "addition") {
+                textToSpeak = "What is " + numberDisplayEl.textContent;
+            } else if (selectedMode === "subtraction") {
+                textToSpeak = "What is " + numberDisplayEl.textContent;
+            }
+            
+            speak(textToSpeak);
+        }
+
+        function generateCountingQuestion() {
+            const count = Math.floor(Math.random() * 10) + 5;
+            questionEl.textContent = "How many objects do you see?";
+            numberDisplayEl.textContent = '';
+            
+            // Create objects to count
+            for (let i = 0; i < count; i++) {
+                const object = document.createElement('div');
+                object.className = 'object';
+                object.textContent = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'][i % 8];
+                object.addEventListener('click', function() {
+                    if (!this.classList.contains('highlighted')) {
+                        clickCount++;
+                        speak(clickCount.toString());
+                    } else {
+                        clickCount--;
+                    }
+                    this.classList.toggle('highlighted');
+                });
+                objectsContainerEl.appendChild(object);
+            }
+            
+            // Generate options
+            const options = [count];
+            while (options.length < 3) {
+                const option = count + (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 3 + 1);
+                if (option > 0 && !options.includes(option)) {
+                    options.push(option);
+                }
+            }
+            
+            // Shuffle and display options
+            shuffleArray(options).forEach(option => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'option';
+                optionEl.textContent = option;
+                optionEl.addEventListener('click', function() {
+                    speak(option);
+                    checkAnswer(option, count);
+                });
+                optionsEl.appendChild(optionEl);
+            });
+            
+            currentQuestion = { answer: count };
+        }
+
+        function generateAdditionQuestion() {
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            const answer = num1 + num2;
+            
+            questionEl.textContent = "What is";
+            numberDisplayEl.textContent = `${num1} + ${num2} = ?`;
+            
+            currentQuestion = { 
+                answer: answer,
+                num1: num1,
+                num2: num2
+            };
+            
+            // Generate options
+            const options = [answer];
+            while (options.length < 3) {
+                const option = answer + (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 3 + 1);
+                if (option > 0 && !options.includes(option)) {
+                    options.push(option);
+                }
+            }
+            
+            // Shuffle and display options
+            shuffleArray(options).forEach(option => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'option';
+                optionEl.textContent = option;
+                optionEl.addEventListener('click', function() {
+                    speak(option);
+                    checkAnswer(option, answer);
+                });
+                optionsEl.appendChild(optionEl);
+            });
+        }
+
+        function generateSubtractionQuestion() {
+            const num1 = Math.floor(Math.random() * 10) + 5;
+            const num2 = Math.floor(Math.random() * num1) + 1;
+            const answer = num1 - num2;
+            
+            questionEl.textContent = "What is";
+            numberDisplayEl.textContent = `${num1} - ${num2} = ?`;
+            
+            currentQuestion = { 
+                answer: answer,
+                num1: num1,
+                num2: num2
+            };
+            
+            // Generate options
+            const options = [answer];
+            while (options.length < 3) {
+                const option = answer + (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 3 + 1);
+                if (option > 0 && !options.includes(option)) {
+                    options.push(option);
+                }
+            }
+            
+            // Shuffle and display options
+            shuffleArray(options).forEach(option => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'option';
+                optionEl.textContent = option;
+                optionEl.addEventListener('click', function() {
+                    speak(option);
+                    checkAnswer(option, answer);
+                });
+                optionsEl.appendChild(optionEl);
+            });
+        }
+
+        function showAdditionHint() {
+            if (hintUsed) return;
+            hintUsed = true;
+            clickCount = 0;
+            
+            objectsContainerEl.innerHTML = '';
+            
+            // Show first set of objects
+            for (let i = 0; i < currentQuestion.num1; i++) {
+                const object = document.createElement('div');
+                object.className = 'object';
+                object.textContent = ['🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓'][i % 8];
+                object.addEventListener('click', function() {
+                    if (!this.classList.contains('highlighted')) {
+                        clickCount++;
+                        speak(clickCount.toString());
+                    } else {
+                        clickCount--;
+                    }
+                    this.classList.toggle('highlighted');
+                });
+                objectsContainerEl.appendChild(object);
+            }
+            
+            // Add plus sign
+            const plus = document.createElement('div');
+            plus.className = 'math-symbol';
+            plus.textContent = '+';
+            objectsContainerEl.appendChild(plus);
+            
+            // Show second set of objects
+            for (let i = 0; i < currentQuestion.num2; i++) {
+                const object = document.createElement('div');
+                object.className = 'object';
+                object.textContent = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'][i % 8];
+                object.addEventListener('click', function() {
+                    if (!this.classList.contains('highlighted')) {
+                        clickCount++;
+                        speak(clickCount.toString());
+                    } else {
+                        clickCount--;
+                    }
+                    this.classList.toggle('highlighted');
+                });
+                objectsContainerEl.appendChild(object);
+            }
+            
+            // Add equals sign
+            const equals = document.createElement('div');
+            equals.className = 'math-symbol';
+            equals.textContent = '=';
+            objectsContainerEl.appendChild(equals);
+            
+            // Show question mark
+            const questionMark = document.createElement('div');
+            questionMark.className = 'math-symbol';
+            questionMark.textContent = '?';
+            objectsContainerEl.appendChild(questionMark);
+        }
+
+        function showSubtractionHint() {
+            if (hintUsed) return;
+            hintUsed = true;
+            let selectedCount = 0;
+            
+            objectsContainerEl.innerHTML = '';
+            
+            // Show only the bigger number objects (total)
+            for (let i = 0; i < currentQuestion.num1; i++) {
+                const object = document.createElement('div');
+                object.className = 'object';
+                object.textContent = ['🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓'][i % 8];
+                object.addEventListener('click', function() {
+                    // Toggle selection (max select up to num2)
+                    if (this.classList.contains('to-remove')) {
+                        this.classList.remove('to-remove');
+                        selectedCount--;
+                        speak(selectedCount.toString()); // Speak count when unselecting
+                    } else if (selectedCount < currentQuestion.num2) {
+                        this.classList.add('to-remove');
+                        selectedCount++;
+                        speak(selectedCount.toString()); // Speak count when selecting
+                    }
+                    
+                    // Update remove button text
+                    updateRemoveButton();
+                });
+                objectsContainerEl.appendChild(object);
+            }
+            
+            // Add minus sign
+            const minus = document.createElement('div');
+            minus.className = 'math-symbol';
+            minus.textContent = '-';
+            objectsContainerEl.appendChild(minus);
+            
+            // Show number to subtract
+            const num2Display = document.createElement('div');
+            num2Display.className = 'math-symbol';
+            num2Display.textContent = currentQuestion.num2;
+            objectsContainerEl.appendChild(num2Display);
+            
+            // Add equals sign
+            const equals = document.createElement('div');
+            equals.className = 'math-symbol';
+            equals.textContent = '=';
+            objectsContainerEl.appendChild(equals);
+            
+            // Show question mark
+            const questionMark = document.createElement('div');
+            questionMark.className = 'math-symbol';
+            questionMark.textContent = '?';
+            objectsContainerEl.appendChild(questionMark);
+            
+            // Add remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.textContent = 'Select ' + currentQuestion.num2 + ' to remove';
+            removeBtn.disabled = true;
+            removeBtn.addEventListener('click', removeObjects);
+            objectsContainerEl.appendChild(removeBtn);
+            
+            function updateRemoveButton() {
+                const selectedCount = document.querySelectorAll('.object.to-remove').length;
+                removeBtn.textContent = selectedCount === currentQuestion.num2 
+                    ? 'Remove ' + currentQuestion.num2 + ' objects' 
+                    : 'Select ' + currentQuestion.num2 + ' to remove';
+                removeBtn.disabled = selectedCount !== currentQuestion.num2;
+            }
+            
+            function removeObjects() {
+                const objectsToRemove = document.querySelectorAll('.object.to-remove');
+                
+                // Make selected objects fall away
+                objectsToRemove.forEach(obj => {
+                    obj.classList.add('falling');
+                });
+                
+                // After animation, show remaining objects
+                setTimeout(() => {
+                    objectsContainerEl.innerHTML = '';
+                    let remainingCount = 0;
+                    
+                    // Show remaining objects (countable)
+                    for (let i = 0; i < currentQuestion.answer; i++) {
+                        const object = document.createElement('div');
+                        object.className = 'object';
+                        object.textContent = ['🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓'][i % 8];
+                        object.addEventListener('click', function() {
+                            if (!this.classList.contains('highlighted')) {
+                                remainingCount++;
+                                speak(remainingCount.toString()); // Speak count number
+                            } else {
+                                remainingCount--;
+                            }
+                            this.classList.toggle('highlighted');
+                        });
+                        objectsContainerEl.appendChild(object);
+                    }
+                    
+                    // Add equals sign
+                    const equals = document.createElement('div');
+                    equals.className = 'math-symbol';
+                    equals.textContent = '=';
+                    objectsContainerEl.appendChild(equals);
+                    
+                    // Show answer
+                    const answer = document.createElement('div');
+                    answer.className = 'object';
+                    answer.textContent = currentQuestion.answer;
+                    answer.style.backgroundColor = '#06d6a0';
+                    objectsContainerEl.appendChild(answer);
+                    
+                    // Speak the equation
+                    speak(`${currentQuestion.num1} minus ${currentQuestion.num2} equals ${currentQuestion.answer}`);
+                }, 500);
+            }
+        }
+
+        function checkAnswer(selectedOption, correctAnswer) {
+            if (selectedOption === correctAnswer) {
+                feedbackEl.textContent = 'Correct! Great job!';
+                feedbackEl.className = 'feedback correct';
+                createCelebration();
+                score++;
+                scoreEl.textContent = score;
+                
+                if (soundEnabled) {
+                    stopAllSounds();
+                    correctSound.play();
+                    setTimeout(() => speak("Correct! " + selectedOption), 1000);
+                }
+                
+                // Disable all options after correct answer
+                document.querySelectorAll('.option').forEach(opt => {
+                    opt.style.pointerEvents = 'none';
+                    if (opt.textContent == correctAnswer) {
+                        opt.style.border = '4px solid #06d6a0';
+                    }
+                });
+            } else {
+                feedbackEl.textContent = `Oops! Try again. The correct answer is ${correctAnswer}.`;
+                feedbackEl.className = 'feedback incorrect';
+                
+                if (soundEnabled) {
+                    stopAllSounds();
+                    wrongSound.play();
+                    setTimeout(() => speak("Try again"), 1000);
+                }
+                
+                // Mark incorrect guess
+                document.querySelectorAll('.option').forEach(opt => {
+                    if (opt.textContent == selectedOption) {
+                        opt.style.border = '4px solid #ef476f';
+                    }
+                });
+            }
+        }
+
+        // Helper function to shuffle array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Event listeners
+        nextBtn.addEventListener('click', generateQuestion);
+        hintBtn.addEventListener('click', function() {
+            if (selectedMode === "addition") {
+                showAdditionHint();
+            } else if (selectedMode === "subtraction") {
+                showSubtractionHint();
+            }
+        });
+        speakQuestionBtn.addEventListener('click', speakQuestion);
+        
+        // Game mode selection
+        gameModeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                gameModeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedMode = btn.dataset.mode;
+                initGame();
+            });
+        });
+
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>

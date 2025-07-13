@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A to Z Indian Phonics Game</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+        .letter-display {
+            font-size: 120px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #2c3e50;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .letter-card {
+            width: 80px;
+            height: 80px;
+            font-size: 48px;
+            margin: 10px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .letter-card:hover {
+            transform: scale(1.1);
+            background-color: #2980b9;
+        }
+        .letter-card.active {
+            background-color: #2ecc71;
+            transform: scale(1.1);
+        }
+        .phonics-display {
+            font-size: 36px;
+            color: #9b59b6;
+            margin: 20px 0;
+            min-height: 50px;
+        }
+        .example-words {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .example-word {
+            padding: 10px 15px;
+            font-size: 20px;
+            background-color: #f1c40f;
+            color: #34495e;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .example-word:hover {
+            background-color: #f39c12;
+            transform: scale(1.05);
+        }
+        .controls {
+            margin: 30px 0 20px;
+        }
+        .control-btn {
+            padding: 12px 24px;
+            font-size: 18px;
+            margin: 0 10px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .control-btn:hover {
+            background-color: #27ae60;
+            transform: scale(1.05);
+        }
+        .sound-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        .alphabet-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        .bounce {
+            animation: bounce 0.5s;
+        }
+        .image-example {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 15px auto;
+            border-radius: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button class="sound-toggle" id="sound-toggle">🔊</button>
+    <div class="game-container">
+        <h1>A to Z Indian Phonics Game</h1>
+        <div class="subtitle">Learn letter sounds with Indian pronunciation!</div>
+        
+        <div class="letter-display" id="letter-display">A</div>
+        <div class="phonics-display" id="phonics-display">Aah</div>
+        
+        <div id="image-container">
+            <img id="letter-image" class="image-example" src="" alt="Example image">
+        </div>
+        
+        <div class="example-words" id="example-words">
+            <div class="example-word" data-word="apple">apple</div>
+            <div class="example-word" data-word="ant">ant</div>
+            <div class="example-word" data-word="alligator">alligator</div>
+        </div>
+        
+        <div class="alphabet-grid" id="alphabet-grid">
+            <!-- Letters will be added by JavaScript -->
+        </div>
+        
+        <div class="controls">
+            <button class="control-btn" id="random-btn">Random Letter</button>
+            <button class="control-btn" id="repeat-btn">Repeat Sound</button>
+        </div>
+    </div>
+
+    <script>
+        // Updated Indian phonics sounds with simple English examples
+        const phonicsData = {
+            A: { sound: "Aah", examples: ["apple", "ant", "alligator"], image: "https://cdn.pixabay.com/photo/2016/01/05/13/58/apple-1122537_640.jpg" },
+            B: { sound: "Bha", examples: ["ball", "bear", "banana"], image: "https://cdn.pixabay.com/photo/2016/11/29/08/41/ball-1868960_640.jpg" },
+            C: { sound: "Cha", examples: ["cat", "car", "cake"], image: "https://cdn.pixabay.com/photo/2017/07/25/01/22/cat-2536662_640.jpg" },
+            D: { sound: "Dha", examples: ["dog", "duck", "dinosaur"], image: "https://cdn.pixabay.com/photo/2016/12/13/05/15/puppy-1903313_640.jpg" },
+            E: { sound: "Eh", examples: ["elephant", "egg", "elf"], image: "https://cdn.pixabay.com/photo/2011/03/27/12/30/elephant-5868_640.jpg" },
+            F: { sound: "Ph", examples: ["fish", "flower", "frog"], image: "https://cdn.pixabay.com/photo/2016/12/31/21/22/discus-fish-1943755_640.jpg" },
+            G: { sound: "Gha", examples: ["goat", "gift", "giraffe"], image: "https://cdn.pixabay.com/photo/2018/07/31/07/12/goat-3574268_640.jpg" },
+            H: { sound: "Haah", examples: ["house", "horse", "hat"], image: "https://cdn.pixabay.com/photo/2016/11/18/17/46/house-1836070_640.jpg" },
+            I: { sound: "Ee", examples: ["igloo", "insect", "inchworm"], image: "https://cdn.pixabay.com/photo/2017/06/09/09/39/adult-2386414_640.jpg" },
+            J: { sound: "Ja", examples: ["jump", "juice", "jellyfish"], image: "https://cdn.pixabay.com/photo/2017/10/15/19/37/jellyfish-2855722_640.jpg" },
+            K: { sound: "Kha", examples: ["kite", "kangaroo", "king"], image: "https://cdn.pixabay.com/photo/2013/07/13/11/44/kangaroo-157584_640.png" },
+            L: { sound: "Laah", examples: ["lion", "leaf", "ladder"], image: "https://cdn.pixabay.com/photo/2017/11/06/09/53/tiger-2923186_640.jpg" },
+            M: { sound: "Maah", examples: ["monkey", "moon", "mouse"], image: "https://cdn.pixabay.com/photo/2017/09/23/17/32/monkey-2779497_640.jpg" },
+            N: { sound: "Naah", examples: ["nest", "nose", "night"], image: "https://cdn.pixabay.com/photo/2017/01/31/23/42/bird-2028687_640.png" },
+            O: { sound: "Oh", examples: ["octopus", "orange", "owl"], image: "https://cdn.pixabay.com/photo/2013/07/13/01/22/octopus-155121_640.png" },
+            P: { sound: "Pha", examples: ["penguin", "pizza", "pumpkin"], image: "https://cdn.pixabay.com/photo/2014/04/17/23/26/environmental-protection-326923_640.jpg" },
+            Q: { sound: "Koo", examples: ["queen", "quilt", "question"], image: "https://cdn.pixabay.com/photo/2017/08/07/14/04/queen-2603728_640.jpg" },
+            R: { sound: "Raah", examples: ["rabbit", "rainbow", "robot"], image: "https://cdn.pixabay.com/photo/2017/04/02/22/36/easter-2197043_640.jpg" },
+            S: { sound: "Saah", examples: ["sun", "snake", "star"], image: "https://cdn.pixabay.com/photo/2013/07/13/11/44/snake-157569_640.png" },
+            T: { sound: "Tha", examples: ["turtle", "tree", "tiger"], image: "https://cdn.pixabay.com/photo/2016/03/27/22/22/turtle-1284669_640.jpg" },
+            U: { sound: "Oo", examples: ["umbrella", "up", "under"], image: "https://cdn.pixabay.com/photo/2017/01/31/23/42/umbrella-2028018_640.png" },
+            V: { sound: "Vaah", examples: ["violin", "volcano", "vegetable"], image: "https://cdn.pixabay.com/photo/2013/07/13/11/36/violin-157822_640.png" },
+            W: { sound: "Waah", examples: ["water", "whale", "window"], image: "https://cdn.pixabay.com/photo/2013/07/13/11/44/whale-158028_640.png" },
+            X: { sound: "Ksa", examples: ["fox", "box", "xylophone"], image: "https://cdn.pixabay.com/photo/2013/07/13/11/44/xylophone-157943_640.png" },
+            Y: { sound: "Yaah", examples: ["yellow", "yo-yo", "yacht"], image: "https://cdn.pixabay.com/photo/2013/07/13/11/44/yo-yo-157940_640.png" },
+            Z: { sound: "Zaah", examples: ["zebra", "zoo", "zipper"], image: "https://cdn.pixabay.com/photo/2017/09/25/18/56/zebra-2786414_640.jpg" }
+        };
+
+        // DOM elements
+        const letterDisplay = document.getElementById('letter-display');
+        const phonicsDisplay = document.getElementById('phonics-display');
+        const exampleWordsContainer = document.getElementById('example-words');
+        const alphabetGrid = document.getElementById('alphabet-grid');
+        const randomBtn = document.getElementById('random-btn');
+        const repeatBtn = document.getElementById('repeat-btn');
+        const soundToggle = document.getElementById('sound-toggle');
+        const letterImage = document.getElementById('letter-image');
+        let currentLetter = 'A';
+        let soundEnabled = true;
+
+        // Initialize the game
+        function initGame() {
+            createAlphabetGrid();
+            updateLetterDisplay('A');
+        }
+
+        // Create the alphabet letter grid
+        function createAlphabetGrid() {
+            alphabetGrid.innerHTML = '';
+            for (let letter = 'A'.charCodeAt(0); letter <= 'Z'.charCodeAt(0); letter++) {
+                const letterChar = String.fromCharCode(letter);
+                const letterCard = document.createElement('div');
+                letterCard.className = 'letter-card';
+                letterCard.textContent = letterChar;
+                letterCard.addEventListener('click', () => {
+                    updateLetterDisplay(letterChar);
+                });
+                alphabetGrid.appendChild(letterCard);
+            }
+        }
+
+        // Update the display for a given letter
+        function updateLetterDisplay(letter, shouldSpeak = true) {
+            currentLetter = letter;
+            const data = phonicsData[letter];
+            
+            // Update displays
+            letterDisplay.textContent = letter;
+            phonicsDisplay.textContent = data.sound;
+            
+            // Update example words
+            exampleWordsContainer.innerHTML = '';
+            data.examples.forEach(word => {
+                const wordEl = document.createElement('div');
+                wordEl.className = 'example-word';
+                wordEl.textContent = word;
+                wordEl.setAttribute('data-word', word);
+                wordEl.addEventListener('click', () => {
+                    speakWord(word);
+                });
+                exampleWordsContainer.appendChild(wordEl);
+            });
+            
+            // Update image
+            if (data.image) {
+                letterImage.style.display = 'block';
+                letterImage.src = data.image;
+                letterImage.alt = `Image for ${letter}`;
+            } else {
+                letterImage.style.display = 'none';
+            }
+            
+            // Highlight current letter in grid
+            document.querySelectorAll('.letter-card').forEach(card => {
+                card.classList.remove('active');
+                if (card.textContent === letter) {
+                    card.classList.add('active');
+                }
+            });
+            
+            // Animate the letter display
+            letterDisplay.classList.add('bounce');
+            setTimeout(() => {
+                letterDisplay.classList.remove('bounce');
+            }, 500);
+            
+            // Speak the sound if enabled
+            if (shouldSpeak) {
+                speakPhonics(letter);
+            }
+        }
+
+        // Speak the phonics sound as a single unit
+        function speakPhonics(letter) {
+            if (!soundEnabled) return;
+            
+            const data = phonicsData[letter];
+            
+            // First say the letter name (moderate speed)
+            speak(`The letter ${letter}`, 0.7, () => {
+                // Then say the Indian phonics sound (fast as single unit)
+                speak(`${data.sound}`, 1.0); // Faster speed (1.2)
+            });
+        }
+
+        // Speak an example word
+        function speakWord(word) {
+            if (!soundEnabled) return;
+            speak(word, 1.0); // Normal speed for words
+        }
+
+        // Speak function with adjustable rate and Indian English accent
+        function speak(text, rate = 1.0, callback) {
+            if ('speechSynthesis' in window && soundEnabled) {
+                window.speechSynthesis.cancel();
+                
+                const speech = new SpeechSynthesisUtterance();
+                speech.text = text;
+                speech.volume = 1;
+                speech.rate = rate;
+                speech.lang = 'en-IN'; // Indian English pronunciation
+                
+                if (callback) {
+                    speech.onend = callback;
+                }
+                
+                window.speechSynthesis.speak(speech);
+            } else if (callback) {
+                callback();
+            }
+        }
+
+        // Get a random letter
+        function getRandomLetter() {
+            const letters = Object.keys(phonicsData);
+            const randomIndex = Math.floor(Math.random() * letters.length);
+            return letters[randomIndex];
+        }
+
+        // Event listeners
+        randomBtn.addEventListener('click', () => {
+            updateLetterDisplay(getRandomLetter());
+        });
+
+        repeatBtn.addEventListener('click', () => {
+            speakPhonics(currentLetter);
+        });
+
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundToggle.textContent = soundEnabled ? "🔊" : "🔇";
+            window.speechSynthesis.cancel();
+        });
+
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>

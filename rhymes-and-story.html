@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids' Video Library</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        
+        header {
+            background-color: #ff9966;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .genre-tabs {
+            display: flex;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 10px;
+        }
+        
+        .genre-tab {
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #66ccff;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+        
+        .genre-tab:hover, .genre-tab.active {
+            background-color: #ff9966;
+            transform: scale(1.05);
+        }
+        
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .video-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .video-thumbnail {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+        
+        .video-thumbnail img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 0, 0, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .play-button::after {
+            content: "";
+            display: block;
+            width: 0;
+            height: 0;
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            border-left: 25px solid white;
+            margin-left: 5px;
+        }
+        
+        .video-info {
+            padding: 15px;
+        }
+        
+        .video-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        
+        .video-duration {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #ff9966;
+            color: white;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .play-button {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .play-button::after {
+                border-top: 10px solid transparent;
+                border-bottom: 10px solid transparent;
+                border-left: 15px solid white;
+                margin-left: 3px;
+            }
+        }
+        
+        /* Loading skeleton */
+        .skeleton {
+            animation: skeleton-loading 1s linear infinite alternate;
+        }
+        
+        @keyframes skeleton-loading {
+            0% {
+                background-color: hsl(200, 20%, 80%);
+            }
+            100% {
+                background-color: hsl(200, 20%, 95%);
+            }
+        }
+        
+        .skeleton-text {
+            width: 100%;
+            height: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🌈 Kids' Video Library 🎈</h1>
+    </header>
+    
+    <div class="container">
+        <div class="genre-tabs">
+            <div class="genre-tab active" onclick="filterVideos('all')">All Videos</div>
+            <div class="genre-tab" onclick="filterVideos('rhymes')">Rhymes</div>
+            <div class="genre-tab" onclick="filterVideos('stories')">Stories</div>
+        </div>
+        
+        <div class="video-grid" id="videoContainer">
+            <!-- Loading skeleton will appear here temporarily -->
+            <div class="video-card skeleton" style="height: 250px;"></div>
+            <div class="video-card skeleton" style="height: 250px;"></div>
+            <div class="video-card skeleton" style="height: 250px;"></div>
+            <div class="video-card skeleton" style="height: 250px;"></div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2023 Kids' Video Library - Safe and fun content for children</p>
+    </footer>
+    
+    <script>
+        // Track currently playing video
+        let currentlyPlaying = null;
+        
+        // Optimized video data with thumbnail URLs
+        const videoLibrary = [
+            {
+                id: "G5hJGdI4A_k",
+                title: "Roar Saya the Lion",
+                genre: "rhymes",
+                duration: "1:06",
+                thumb: "https://img.youtube.com/vi/G5hJGdI4A_k/mqdefault.jpg"
+            },
+            {
+                id: "E8GyMbxrG_M",
+                title: "Zebra",
+                genre: "rhymes",
+                duration: "0:52",
+                thumb: "https://img.youtube.com/vi/E8GyMbxrG_M/mqdefault.jpg"
+            },
+            {
+                id: "NsN4nL_598o",
+                title: "Rabbits Rabbits",
+                genre: "rhymes",
+                duration: "1:19",
+                thumb: "https://img.youtube.com/vi/NsN4nL_598o/mqdefault.jpg"
+            },
+            {
+                id: "2o332s5Hl0c",
+                title: "Walking Through the Jungle",
+                genre: "stories",
+                duration: "3:11",
+                thumb: "https://img.youtube.com/vi/2o332s5Hl0c/mqdefault.jpg"
+            },
+            {
+                id: "-jULlTk4wjo",
+                title: "The Lion and the Cows",
+                genre: "stories",
+                duration: "3:14",
+                thumb: "https://img.youtube.com/vi/jULlTk4wjo/mqdefault.jpg"
+            },
+            {
+                id: "Tf3Ni5ny0KM",
+                title: "Summer",
+                genre: "rhymes",
+                duration: "1:53",
+                thumb: "https://img.youtube.com/vi/Tf3Ni5ny0KM/mqdefault.jpg"
+            },
+            {
+                id: "iApZZIYmq90",
+                title: "Raining",
+                genre: "rhymes",
+                duration: "0:56",
+                thumb: "https://img.youtube.com/vi/iApZZIYmq90/mqdefault.jpg"
+            },
+            {
+                id: "bWz1i6rEL4M",
+                title: "I Am a Little Snow Man",
+                genre: "rhymes",
+                duration: "1:36",
+                thumb: "https://img.youtube.com/vi/bWz1i6rEL4M/mqdefault.jpg"
+            },
+            {
+                id: "7w7ukSoeBTA",
+                title: "Rudolph the Red-Nosed Reindeer",
+                genre: "rhymes",
+                duration: "2:14",
+                thumb: "https://img.youtube.com/vi/7w7ukSoeBTA/mqdefault.jpg"
+            },
+            {
+                id: "vTnfov0Q1YQ",
+                title: "The Snowman Story",
+                genre: "stories",
+                duration: "1:17",
+                thumb: "https://img.youtube.com/vi/vTnfov0Q1YQ/mqdefault.jpg"
+            },
+            {
+                id: "jflZseWtmyI",
+                title: "Butterfly Song",
+                genre: "rhymes",
+                duration: "2:24",
+                thumb: "https://img.youtube.com/vi/jflZseWtmyI/mqdefault.jpg"
+            },
+            {
+                id: "e9sXUhv7vgo",
+                title: "Sandy Spider",
+                genre: "rhymes",
+                duration: "0:24",
+                thumb: "https://img.youtube.com/vi/e9sXUhv7vgo/mqdefault.jpg"
+            },
+            {
+                id: "n8jbRBVckcE",
+                title: "Ant",
+                genre: "rhymes",
+                duration: "1:30",
+                thumb: "https://img.youtube.com/vi/n8jbRBVckcE/mqdefault.jpg"
+            },
+            {
+                id: "L8_ZwBGntBw",
+                title: "The Ant and the Grasshopper",
+                genre: "stories",
+                duration: "7:18",
+                thumb: "https://img.youtube.com/vi/L8_ZwBGntBw/mqdefault.jpg"
+            },
+            {
+                id: "_r0cQgUy088",
+                title: "Swallowed a Peanut",
+                genre: "rhymes",
+                duration: "0:53",
+                thumb: "https://img.youtube.com/vi/_r0cQgUy088/mqdefault.jpg"
+            },
+            {
+                id: "Wey3n3wLEd4",
+                title: "Tailor, Cobbler Policeman",
+                genre: "rhymes",
+                duration: "1:12",
+                thumb: "https://img.youtube.com/vi/Wey3n3wLEd4/mqdefault.jpg"
+            },
+            {
+                id: "t8ASRXhUopk",
+                title: "Rat-a-Tat",
+                genre: "rhymes",
+                duration: "1:30",
+                thumb: "https://img.youtube.com/vi/t8ASRXhUopk/mqdefault.jpg"
+            },
+            {
+                id: "NX2t5vriAD8",
+                title: "My Teacher",
+                genre: "rhymes",
+                duration: "0:34",
+                thumb: "https://img.youtube.com/vi/NX2t5vriAD8/mqdefault.jpg"
+            },
+            {
+                id: "-dCo7IDOTbk",
+                title: "The Honest Woodcutter",
+                genre: "stories",
+                duration: "2:29",
+                thumb: "https://img.youtube.com/vi/-dCo7IDOTbk/mqdefault.jpg"
+            },
+            {
+                id: "44JqBrKs39M",
+                title: "Three Ducks",
+                genre: "rhymes",
+                duration: "1:32",
+                thumb: "https://img.youtube.com/vi/44JqBrKs39M/mqdefault.jpg"
+            },
+            {
+                id: "v2-vAyN1uGU",
+                title: "Dolphin",
+                genre: "rhymes",
+                duration: "1:31",
+                thumb: "https://img.youtube.com/vi/v2-vAyN1uGU/mqdefault.jpg"
+            },
+            {
+                id: "2PF9JcML62I",
+                title: "Three Clever Fish",
+                genre: "stories",
+                duration: "1:32",
+                thumb: "https://img.youtube.com/vi/2PF9JcML62I/mqdefault.jpg"
+            }
+        ];
+        
+        // Function to stop currently playing video
+        function stopCurrentVideo() {
+            if (currentlyPlaying) {
+                // Replace iframe with thumbnail again
+                const videoContainer = currentlyPlaying.querySelector('.video-thumbnail');
+                const videoId = videoContainer.getAttribute('data-video-id');
+                const videoData = videoLibrary.find(v => v.id === videoId);
+                
+                videoContainer.innerHTML = `
+                    <img src="${videoData.thumb}" loading="lazy" alt="${videoData.title} thumbnail">
+                    <div class="play-button"></div>
+                `;
+                
+                // Reattach click handler
+                videoContainer.addEventListener('click', playVideo);
+                currentlyPlaying = null;
+            }
+        }
+        
+        // Function to play a video
+        function playVideo() {
+            // Stop any currently playing video
+            stopCurrentVideo();
+            
+            // Get video ID and parent card
+            const videoId = this.getAttribute('data-video-id');
+            const videoCard = this.closest('.video-card');
+            
+            // Mark this as currently playing
+            currentlyPlaying = videoCard;
+            
+            // Replace with iframe
+            this.innerHTML = `
+                <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen></iframe>
+            `;
+        }
+        
+        // Function to display videos with lazy loading
+        function displayVideos(videos) {
+            const container = document.getElementById('videoContainer');
+            container.innerHTML = '';
+            
+            videos.forEach(video => {
+                const videoCard = document.createElement('div');
+                videoCard.className = 'video-card';
+                videoCard.innerHTML = `
+                    <div class="video-thumbnail" data-video-id="${video.id}">
+                        <img src="${video.thumb}" loading="lazy" alt="${video.title} thumbnail">
+                        <div class="play-button"></div>
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">${video.title}</div>
+                        <div class="video-duration">${video.duration}</div>
+                    </div>
+                `;
+                container.appendChild(videoCard);
+            });
+            
+            // Add click handlers to thumbnails
+            document.querySelectorAll('.video-thumbnail').forEach(thumb => {
+                thumb.addEventListener('click', playVideo);
+            });
+        }
+        
+        // Function to filter videos by genre
+        function filterVideos(genre) {
+            // Update active tab
+            document.querySelectorAll('.genre-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Stop any playing video when changing genres
+            stopCurrentVideo();
+            
+            if (genre === 'all') {
+                displayVideos(videoLibrary);
+            } else {
+                const filteredVideos = videoLibrary.filter(video => video.genre === genre);
+                displayVideos(filteredVideos);
+            }
+        }
+        
+        // Initialize the app by displaying all videos
+        window.addEventListener('DOMContentLoaded', function() {
+            // Small delay to show loading skeleton (for demo purposes)
+            setTimeout(() => {
+                displayVideos(videoLibrary);
+            }, 500);
+        });
+    </script>
+</body>
+</html>

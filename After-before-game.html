@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Finding Game for Kids</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            color: #ff6b6b;
+        }
+        .question-text {
+            font-size: 24px;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+        .number-line {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            font-size: 32px;
+        }
+        .number-display {
+            font-weight: bold;
+            color: #3498db;
+        }
+        .answer-display {
+            width: 80px;
+            height: 60px;
+            font-size: 32px;
+            text-align: center;
+            border: 3px solid #3498db;
+            border-radius: 10px;
+            background-color: #f8f8f8;
+            line-height: 60px;
+        }
+        .hint-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .hint-number {
+            width: 80px;
+            height: 80px;
+            font-size: 36px;
+            text-align: center;
+            border: 3px solid #3498db;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #f8f8f8;
+            line-height: 80px;
+            transition: all 0.3s;
+        }
+        .hint-number:hover {
+            background-color: #e8f4fc;
+            transform: scale(1.05);
+        }
+        .feedback {
+            font-size: 22px;
+            font-weight: bold;
+            min-height: 30px;
+            margin: 15px 0;
+            position: relative;
+            height: 40px;
+        }
+        .correct {
+            color: #27ae60;
+        }
+        .incorrect {
+            color: #e74c3c;
+        }
+        .score {
+            font-size: 20px;
+            margin: 15px 0;
+            color: #9b59b6;
+        }
+        .difficulty {
+            margin: 15px 0;
+        }
+        select {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 300px;
+        }
+        .emoji {
+            font-size: 24px;
+        }
+        .game-type-selector {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .game-type-btn {
+            background-color: #3498db;
+            padding: 10px 20px;
+            font-size: 18px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .game-type-btn.active {
+            background-color: #2980b9;
+            transform: scale(1.05);
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        .next-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+        .next-btn:hover {
+            background-color: #8e44ad;
+            transform: scale(1.05);
+        }
+        .falling-emoji {
+            position: fixed;
+            top: -50px;
+            font-size: 24px;
+            z-index: 10;
+            animation: fall linear forwards;
+            pointer-events: none;
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        .sound-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .hint-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+        .hint-btn:hover {
+            background-color: #e67e22;
+            transform: scale(1.05);
+        }
+        .hint-sequence {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .hint-seq-number {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            text-align: center;
+            border: 2px solid #f39c12;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #fef9e7;
+            line-height: 50px;
+            transition: all 0.3s;
+        }
+        .hint-seq-number:hover {
+            background-color: #fdebd0;
+        }
+        .hint-seq-number.correct {
+            background-color: #d4edda;
+            border-color: #27ae60;
+            font-weight: bold;
+        }
+        .speak-btn {
+            padding: 8px 15px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+        .speak-btn:hover {
+            background-color: #2980b9;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="sound-toggle" id="sound-toggle">🔊</div>
+    <div class="game-container">
+        <h1>Number Finding Game <span class="emoji">🔢</span></h1>
+        
+        <div class="difficulty">
+            <label for="difficulty">Difficulty: </label>
+            <select id="difficulty">
+                <option value="beginner1">Beginner (1-20)</option>
+                <option value="beginner2">Beginner (1-50)</option>
+                <option value="beginner3">Beginner (1-100)</option>
+                <option value="easy">Easy (101-200)</option>
+                <option value="medium">Medium (201-300)</option>
+                <option value="hard">Hard (301-400)</option>
+                <option value="harder">Harder (401-500)</option>
+                <option value="expert">Expert (501-600)</option>
+                <option value="master">Master (601-700)</option>
+                <option value="champion">Champion (701-800)</option>
+                <option value="genius">Genius (801-900)</option>
+                <option value="legend">Legend (901-1000)</option>
+            </select>
+        </div>
+        
+        <div class="game-type-selector">
+            <button class="game-type-btn" data-type="before">Before</button>
+            <button class="game-type-btn" data-type="after">After</button>
+            <button class="game-type-btn" data-type="middle">Between</button>
+            <button class="game-type-btn active" data-type="all">All Types</button>
+        </div>
+        
+        <div class="score">Score: <span id="score">0</span></div>
+        
+        <div class="question-text" id="question-text"></div>
+        <div class="number-line" id="number-line"></div>
+        <div class="hint-options" id="hint-options"></div>
+        
+        <div class="feedback" id="feedback"></div>
+        
+        <div id="hint-sequence-container" style="display: none;">
+            <div class="hint-sequence" id="hint-sequence"></div>
+        </div>
+        
+        <div class="button-group">
+            <button class="speak-btn" id="speak-question">🔊 Read Question</button>
+            <button class="hint-btn" id="hint-btn">💡 Show Hint</button>
+            <button class="next-btn" id="next-btn">Next Question</button>
+        </div>
+    </div>
+
+    <audio id="correct-sound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_d5d01bc031.mp3"></audio>
+    <audio id="wrong-sound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_39b5f497b1.mp3"></audio>
+
+    <script>
+        let score = 0;
+        let currentQuestion = {};
+        let selectedGameType = "all";
+        let soundEnabled = true;
+        let questionCount = 1;
+        const difficultySettings = {
+            beginner1: { min: 1, max: 20 },
+            beginner2: { min: 1, max: 50 },
+            beginner3: { min: 1, max: 100 },
+            easy: { min: 101, max: 200 },
+            medium: { min: 201, max: 300 },
+            hard: { min: 301, max: 400 },
+            harder: { min: 401, max: 500 },
+            expert: { min: 501, max: 600 },
+            master: { min: 601, max: 700 },
+            champion: { min: 701, max: 800 },
+            genius: { min: 801, max: 900 },
+            legend: { min: 901, max: 1000 }
+        };
+
+        // DOM elements
+        const questionTextEl = document.getElementById('question-text');
+        const numberLineEl = document.getElementById('number-line');
+        const hintOptionsEl = document.getElementById('hint-options');
+        const feedbackEl = document.getElementById('feedback');
+        const scoreEl = document.getElementById('score');
+        const nextBtn = document.getElementById('next-btn');
+        const difficultySelect = document.getElementById('difficulty');
+        const gameTypeBtns = document.querySelectorAll('.game-type-btn');
+        const soundToggle = document.getElementById('sound-toggle');
+        const correctSound = document.getElementById('correct-sound');
+        const wrongSound = document.getElementById('wrong-sound');
+        const hintBtn = document.getElementById('hint-btn');
+        const hintSequenceContainer = document.getElementById('hint-sequence-container');
+        const hintSequenceEl = document.getElementById('hint-sequence');
+        const speakQuestionBtn = document.getElementById('speak-question');
+
+        // Set lower volume for sound effects
+        correctSound.volume = 0.3;
+        wrongSound.volume = 0.3;
+
+        // Game types
+        const gameTypes = [
+            { type: 'before', text: 'What number comes before' },
+            { type: 'after', text: 'What number comes after' },
+            { type: 'middle', text: 'What number is between' }
+        ];
+
+        // Initialize game
+        function initGame() {
+            score = 0;
+            questionCount = 1;
+            scoreEl.textContent = score;
+            generateQuestion();
+        }
+
+        // Enhanced speak function with louder voice
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const speech = new SpeechSynthesisUtterance();
+                speech.text = text;
+                speech.volume = 1.5; // Increased voice volume
+                speech.rate = 0.9;
+                speech.pitch = 1;
+                window.speechSynthesis.cancel(); // Stop any current speech
+                window.speechSynthesis.speak(speech);
+            }
+        }
+
+        // Stop all sounds
+        function stopAllSounds() {
+            correctSound.pause();
+            correctSound.currentTime = 0;
+            wrongSound.pause();
+            wrongSound.currentTime = 0;
+            window.speechSynthesis.cancel();
+        }
+
+        // Toggle sound
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundToggle.textContent = soundEnabled ? "🔊" : "🔇";
+            if (!soundEnabled) stopAllSounds();
+        });
+
+        // Create falling emojis
+        function createFallingEmojis() {
+            const existingEmojis = document.querySelectorAll('.falling-emoji');
+            existingEmojis.forEach(el => el.remove());
+            
+            const emojis = ['❤️', '🌸', '⭐', '🌼', '✨', '🌺'];
+            const screenWidth = window.innerWidth;
+            
+            for (let i = 0; i < 20; i++) {
+                const emoji = document.createElement('div');
+                emoji.className = 'falling-emoji';
+                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                emoji.style.left = `${Math.random() * screenWidth}px`;
+                const duration = 3 + Math.random() * 3;
+                emoji.style.animationDuration = `${duration}s`;
+                emoji.style.animationDelay = `${Math.random() * 2}s`;
+                document.body.appendChild(emoji);
+                setTimeout(() => {
+                    emoji.remove();
+                }, duration * 1000);
+            }
+        }
+
+        // Generate question with full speech
+        function generateQuestion() {
+            stopAllSounds();
+            
+            const difficulty = difficultySelect.value;
+            const settings = difficultySettings[difficulty];
+            
+            let availableTypes = gameTypes;
+            if (selectedGameType !== 'all') {
+                availableTypes = gameTypes.filter(type => type.type === selectedGameType);
+            }
+            
+            const gameType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+            let num1, num2, num3, answer;
+            
+            if (gameType.type === 'before') {
+                num2 = getRandomNumber(settings.min + 1, settings.max);
+                num1 = num2 - 1;
+                answer = num1;
+            } 
+            else if (gameType.type === 'after') {
+                num1 = getRandomNumber(settings.min, settings.max - 1);
+                num2 = num1 + 1;
+                answer = num2;
+            } 
+            else {
+                num1 = getRandomNumber(settings.min, settings.max - 2);
+                num2 = num1 + 1;
+                num3 = num1 + 2;
+                answer = num2;
+            }
+            
+            // Set question text
+            const questionText = `Question ${questionCount}: ${gameType.text}?`;
+            questionTextEl.textContent = questionText;
+            
+            // Clear and setup number line
+            numberLineEl.innerHTML = '';
+            let fullSpeechText = questionText;
+            
+            if (gameType.type === 'before') {
+                const answerDisplay = document.createElement('div');
+                answerDisplay.className = 'answer-display';
+                answerDisplay.textContent = '?';
+                answerDisplay.id = 'answer-display';
+                numberLineEl.appendChild(answerDisplay);
+                
+                const numberDisplay = document.createElement('span');
+                numberDisplay.className = 'number-display';
+                numberDisplay.textContent = num2;
+                numberLineEl.appendChild(numberDisplay);
+                
+                fullSpeechText += ` The number is before ${num2}`;
+            } 
+            else if (gameType.type === 'after') {
+                const numberDisplay = document.createElement('span');
+                numberDisplay.className = 'number-display';
+                numberDisplay.textContent = num1;
+                numberLineEl.appendChild(numberDisplay);
+                
+                const answerDisplay = document.createElement('div');
+                answerDisplay.className = 'answer-display';
+                answerDisplay.textContent = '?';
+                answerDisplay.id = 'answer-display';
+                numberLineEl.appendChild(answerDisplay);
+                
+                fullSpeechText += ` The number is after ${num1}`;
+            } 
+            else {
+                const numberDisplay1 = document.createElement('span');
+                numberDisplay1.className = 'number-display';
+                numberDisplay1.textContent = num1;
+                numberLineEl.appendChild(numberDisplay1);
+                
+                const answerDisplay = document.createElement('div');
+                answerDisplay.className = 'answer-display';
+                answerDisplay.textContent = '?';
+                answerDisplay.id = 'answer-display';
+                numberLineEl.appendChild(answerDisplay);
+                
+                const numberDisplay2 = document.createElement('span');
+                numberDisplay2.className = 'number-display';
+                numberDisplay2.textContent = num3;
+                numberLineEl.appendChild(numberDisplay2);
+                
+                fullSpeechText += ` The number is between ${num1} and ${num3}`;
+            }
+            
+            // Speak the full question with context
+            speak(fullSpeechText);
+            
+            // Generate hint options
+            hintOptionsEl.innerHTML = '';
+            let options = [answer];
+            while (options.length < 3) {
+                let randomOption;
+                if (gameType.type === 'before') {
+                    const range = settings.max <= 100 ? 10 : Math.floor(settings.max / 10);
+                    randomOption = getRandomNumber(Math.max(settings.min, answer - range), answer + range);
+                } else if (gameType.type === 'after') {
+                    const range = settings.max <= 100 ? 10 : Math.floor(settings.max / 10);
+                    randomOption = getRandomNumber(Math.max(settings.min, answer - range), Math.min(settings.max, answer + range));
+                } else {
+                    const range = settings.max <= 100 ? 5 : Math.floor(settings.max / 20);
+                    randomOption = getRandomNumber(Math.max(settings.min, num1 - range), Math.min(settings.max, num3 + range));
+                }
+                
+                if (randomOption !== answer && !options.includes(randomOption)) {
+                    options.push(randomOption);
+                }
+            }
+            
+            // Shuffle and display hint options
+            options = shuffleArray(options);
+            options.forEach(option => {
+                const hintNumber = document.createElement('div');
+                hintNumber.className = 'hint-number';
+                hintNumber.textContent = option;
+                hintNumber.addEventListener('click', () => {
+                    document.getElementById('answer-display').textContent = option;
+                    checkAnswer(option);
+                    speak(`You selected ${option}`);
+                });
+                hintOptionsEl.appendChild(hintNumber);
+            });
+            
+            // Store current question data
+            currentQuestion = {
+                answer: answer,
+                gameType: gameType.type,
+                numbers: {
+                    num1: num1,
+                    num2: num2,
+                    num3: num3
+                },
+                settings: settings,
+                fullSpeechText: fullSpeechText
+            };
+            
+            // Clear feedback and hint sequence
+            feedbackEl.textContent = '';
+            feedbackEl.className = 'feedback';
+            hintSequenceContainer.style.display = 'none';
+            hintSequenceEl.innerHTML = '';
+        }
+
+        // Show hint sequence
+        function showHintSequence() {
+            hintSequenceContainer.style.display = 'block';
+            hintSequenceEl.innerHTML = '';
+            
+            const answer = currentQuestion.answer;
+            const settings = currentQuestion.settings;
+            
+            // Calculate range (5 before, correct, 4 after)
+            const start = Math.max(settings.min, answer - 5);
+            const end = Math.min(settings.max, answer + 4);
+            
+            for (let i = start; i <= end; i++) {
+                const numEl = document.createElement('div');
+                numEl.className = 'hint-seq-number';
+                if (i === answer) numEl.classList.add('correct');
+                numEl.textContent = i;
+                numEl.addEventListener('click', () => {
+                    speak(i.toString());
+                });
+                hintSequenceEl.appendChild(numEl);
+            }
+            
+            // Speak the hint instruction
+            speak(`Here's a hint. The correct number is between ${start} and ${end}. The green number is the correct answer.`);
+        }
+
+        function checkAnswer(selectedNumber) {
+            if (selectedNumber === currentQuestion.answer) {
+                feedbackEl.textContent = 'Correct!';
+                feedbackEl.className = 'feedback correct';
+                createFallingEmojis();
+                score++;
+                scoreEl.textContent = score;
+                questionCount++;
+                
+                if (soundEnabled) {
+                    stopAllSounds();
+                    correctSound.play();
+                }
+                
+                speak(`Correct! The answer is ${currentQuestion.answer}. Well done!`);
+                
+                document.querySelectorAll('.hint-number').forEach(hint => {
+                    hint.style.pointerEvents = 'none';
+                    if (hint.textContent == currentQuestion.answer) {
+                        hint.style.backgroundColor = '#d4edda';
+                        hint.style.borderColor = '#27ae60';
+                    }
+                });
+            } else {
+                feedbackEl.textContent = 'Try again!';
+                feedbackEl.className = 'feedback incorrect';
+                
+                if (soundEnabled) {
+                    stopAllSounds();
+                    wrongSound.play();
+                }
+                
+                speak(`Try again! ${selectedNumber} is not correct.`);
+                
+                document.querySelectorAll('.hint-number').forEach(hint => {
+                    if (hint.textContent == selectedNumber) {
+                        hint.style.backgroundColor = '#f8d7da';
+                        hint.style.borderColor = '#e74c3c';
+                    }
+                });
+            }
+        }
+
+        // Helper functions
+        function getRandomNumber(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Event listeners
+        nextBtn.addEventListener('click', () => {
+            stopAllSounds();
+            generateQuestion();
+        });
+        
+        difficultySelect.addEventListener('change', initGame);
+
+        gameTypeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                gameTypeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedGameType = btn.dataset.type;
+                initGame();
+            });
+        });
+
+        hintBtn.addEventListener('click', showHintSequence);
+
+        speakQuestionBtn.addEventListener('click', () => {
+            if (currentQuestion.fullSpeechText) {
+                speak(currentQuestion.fullSpeechText);
+            }
+        });
+
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>

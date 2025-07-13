@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Game: Greater & Smaller Finder</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            background-color: #f0f9ff;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+        .number-display {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        .number-box {
+            width: 120px;
+            height: 120px;
+            font-size: 72px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f1c40f;
+            color: #2c3e50;
+            border-radius: 20px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .number-box:hover {
+            transform: scale(1.05);
+            background-color: #f39c12;
+        }
+        .number-box.selected {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .question {
+            font-size: 28px;
+            color: #2c3e50;
+            margin: 20px 0;
+        }
+        .controls {
+            margin: 30px 0 20px;
+        }
+        .control-btn {
+            padding: 12px 24px;
+            font-size: 18px;
+            margin: 0 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .control-btn:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+        .feedback {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 20px 0;
+            min-height: 40px;
+        }
+        .correct {
+            color: #2ecc71;
+        }
+        .incorrect {
+            color: #e74c3c;
+        }
+        .score-display {
+            font-size: 24px;
+            color: #9b59b6;
+            margin: 20px 0;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        .bounce {
+            animation: bounce 0.5s;
+        }
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Number Game</h1>
+        <div class="subtitle">Find the Greater or Smaller Number</div>
+        
+        <div class="score-display">
+            Score: <span id="score">0</span> | Questions: <span id="question-count">0</span>
+        </div>
+        
+        <div class="number-display">
+            <div class="number-box" id="number1">5</div>
+            <div class="number-box" id="number2">8</div>
+        </div>
+        
+        <div class="question" id="question">
+            Which number is GREATER?
+        </div>
+        
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="controls">
+            <button class="control-btn" id="new-question">New Question</button>
+            <button class="control-btn" id="toggle-mode">Switch to Smaller</button>
+        </div>
+    </div>
+
+    <div class="celebration" id="celebration"></div>
+
+    <audio id="correct-sound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_d5d01bc031.mp3"></audio>
+    <audio id="wrong-sound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_39b5f497b1.mp3"></audio>
+
+    <script>
+        // Game variables
+        let score = 0;
+        let questionCount = 0;
+        let currentMode = 'greater'; // 'greater' or 'smaller'
+        let number1 = 0;
+        let number2 = 0;
+        let correctAnswer = '';
+        let speechEnabled = true;
+        
+        // DOM elements
+        const number1Element = document.getElementById('number1');
+        const number2Element = document.getElementById('number2');
+        const questionElement = document.getElementById('question');
+        const feedbackElement = document.getElementById('feedback');
+        const scoreElement = document.getElementById('score');
+        const questionCountElement = document.getElementById('question-count');
+        const newQuestionBtn = document.getElementById('new-question');
+        const toggleModeBtn = document.getElementById('toggle-mode');
+        const celebrationElement = document.getElementById('celebration');
+        const correctSound = document.getElementById('correct-sound');
+        const wrongSound = document.getElementById('wrong-sound');
+        
+        // Set lower volume for MP3 sounds
+        correctSound.volume = 0.3;
+        wrongSound.volume = 0.3;
+        
+        // Initialize the game
+        function initGame() {
+            generateNewQuestion();
+            
+            // Event listeners with immediate speech reset
+            number1Element.addEventListener('click', () => {
+                resetSpeech();
+                checkAnswer('left');
+            });
+            number2Element.addEventListener('click', () => {
+                resetSpeech();
+                checkAnswer('right');
+            });
+            newQuestionBtn.addEventListener('click', () => {
+                resetSpeech();
+                generateNewQuestion();
+            });
+            toggleModeBtn.addEventListener('click', () => {
+                resetSpeech();
+                toggleMode();
+            });
+        }
+        
+        // Immediately stop all speech and sounds
+        function resetSpeech() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            correctSound.pause();
+            correctSound.currentTime = 0;
+            wrongSound.pause();
+            wrongSound.currentTime = 0;
+        }
+        
+        // Generate a new question
+        function generateNewQuestion() {
+            // Clear feedback and selection
+            feedbackElement.textContent = '';
+            feedbackElement.className = 'feedback';
+            number1Element.classList.remove('selected');
+            number2Element.classList.remove('selected');
+            
+            // Generate random numbers (1-20 for UKG level)
+            number1 = Math.floor(Math.random() * 20) + 1;
+            number2 = Math.floor(Math.random() * 20) + 1;
+            
+            // Make sure numbers are different
+            while (number1 === number2) {
+                number2 = Math.floor(Math.random() * 20) + 1;
+            }
+            
+            // Update display
+            number1Element.textContent = number1;
+            number2Element.textContent = number2;
+            
+            // Animate numbers
+            number1Element.classList.add('bounce');
+            number2Element.classList.add('bounce');
+            setTimeout(() => {
+                number1Element.classList.remove('bounce');
+                number2Element.classList.remove('bounce');
+            }, 500);
+            
+            // Set question based on mode
+            if (currentMode === 'greater') {
+                questionElement.textContent = 'Which number is GREATER?';
+                correctAnswer = number1 > number2 ? 'left' : 'right';
+            } else {
+                questionElement.textContent = 'Which number is SMALLER?';
+                correctAnswer = number1 < number2 ? 'left' : 'right';
+            }
+            
+            questionCount++;
+            questionCountElement.textContent = questionCount;
+            
+            // Speak the fresh question
+            speakQuestion();
+        }
+        
+        // Speak the current question
+        function speakQuestion() {
+            if (!speechEnabled) return;
+            
+            const questionText = currentMode === 'greater' 
+                ? `Which number is greater? ${number1} or ${number2}?`
+                : `Which number is smaller? ${number1} or ${number2}?`;
+            
+            speak(questionText, 0.9);
+        }
+        
+        // Check the player's answer with immediate feedback
+        function checkAnswer(selected) {
+            // Highlight selected number
+            if (selected === 'left') {
+                number1Element.classList.add('selected');
+                number2Element.classList.remove('selected');
+            } else {
+                number2Element.classList.add('selected');
+                number1Element.classList.remove('selected');
+            }
+            
+            if (selected === correctAnswer) {
+                // Correct answer
+                feedbackElement.textContent = 'Correct! 🎉';
+                feedbackElement.className = 'feedback correct';
+                score++;
+                scoreElement.textContent = score;
+                createConfetti();
+                correctSound.play();
+                speak("Correct! Well done!", 1.0, 1.5);
+            } else {
+                // Incorrect answer
+                feedbackElement.textContent = 'Try again!';
+                feedbackElement.className = 'feedback incorrect';
+                wrongSound.play();
+                speak("Oops! Try again.", 1.0, 1.5);
+            }
+        }
+        
+        // Toggle between greater/smaller modes
+        function toggleMode() {
+            if (currentMode === 'greater') {
+                currentMode = 'smaller';
+                toggleModeBtn.textContent = 'Switch to Greater';
+            } else {
+                currentMode = 'greater';
+                toggleModeBtn.textContent = 'Switch to Smaller';
+            }
+            generateNewQuestion();
+        }
+        
+        // Text-to-speech function with volume control
+        function speak(text, rate = 1.0, volume = 1.5) {
+            if ('speechSynthesis' in window && speechEnabled) {
+                const speech = new SpeechSynthesisUtterance();
+                speech.text = text;
+                speech.volume = volume;
+                speech.rate = rate;
+                speech.lang = 'en-US';
+                window.speechSynthesis.speak(speech);
+            }
+        }
+        
+        // Create celebration confetti
+        function createConfetti() {
+            celebrationElement.style.display = 'block';
+            celebrationElement.innerHTML = '';
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // Random position
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = -10 + 'px';
+                
+                // Random color
+                const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Random size
+                const size = Math.random() * 10 + 5;
+                confetti.style.width = size + 'px';
+                confetti.style.height = size + 'px';
+                
+                // Random shape
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                
+                // Animation
+                const animationDuration = Math.random() * 3 + 2;
+                confetti.style.animation = `fall ${animationDuration}s linear forwards`;
+                
+                // Add keyframes dynamically
+                const keyframes = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(100vh) rotate(${Math.random() * 360}deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                const style = document.createElement('style');
+                style.innerHTML = keyframes;
+                document.head.appendChild(style);
+                
+                celebrationElement.appendChild(confetti);
+            }
+            
+            setTimeout(() => {
+                celebrationElement.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>

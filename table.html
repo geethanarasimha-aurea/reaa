@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Times Table Memory Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+        }
+        .game-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+            padding: 10px;
+        }
+        h1 {
+            color: #ff6b6b;
+            font-size: 1.5rem;
+            margin: 5px 0;
+        }
+        .subtitle {
+            color: #3498db;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        .table-selector {
+            margin: 10px 0;
+        }
+        select {
+            padding: 6px;
+            border-radius: 6px;
+            border: 2px solid #3498db;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        .score-display {
+            font-size: 1rem;
+            color: #9b59b6;
+            margin: 5px 0;
+        }
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .table-item {
+            padding: 8px;
+            font-size: 1.0rem;
+            background-color: #f1c40f;
+            color: #34495e;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+            font-weight: bold;
+        }
+        .table-item:hover {
+            background-color: #f39c12;
+        }
+        .question {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin: 10px 0;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .answer-section {
+            margin: 10px 0;
+        }
+        .answer-input {
+            font-size: 1rem;
+            padding: 6px;
+            width: 70px;
+            text-align: center;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            margin: 5px;
+        }
+        .hint-options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0;
+        }
+        .hint-option {
+            padding: 6px 10px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        .hint-option:hover {
+            background-color: #2980b9;
+        }
+        .feedback {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 8px 0;
+            min-height: 25px;
+        }
+        .correct {
+            color: #2ecc71;
+        }
+        .incorrect {
+            color: #e74c3c;
+        }
+        .controls {
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+        }
+        .control-btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 35px;
+        }
+        .check-btn {
+            background-color: #2ecc71;
+        }
+        .check-btn:hover {
+            background-color: #27ae60;
+        }
+        .hint-btn {
+            background-color: #9b59b6;
+        }
+        .hint-btn:hover {
+            background-color: #8e44ad;
+        }
+        .control-btn:hover {
+            background-color: #2980b9;
+        }
+        .highlight {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .hidden {
+            display: none;
+        }
+        #auto-practice-btn {
+            background-color: #9b59b6;
+        }
+        #stop-auto-practice {
+            background-color: #e74c3c;
+            display: none;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .bounce {
+            animation: bounce 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <!-- Practice Page -->
+    <div id="practice-page" class="page">
+        <div class="game-container">
+            <h1>Times Table Practice</h1>
+            <div class="subtitle">Learn the times tables with fun!</div>
+            
+            <div class="table-selector">
+                <select id="table-select">
+                    <option value="2">2 times table</option>
+                    <option value="3">3 times table</option>
+                    <option value="4">4 times table</option>
+                    <option value="5">5 times table</option>
+                    <option value="6">6 times table</option>
+                    <option value="7">7 times table</option>
+                    <option value="8">8 times table</option>
+                    <option value="9">9 times table</option>
+                    <option value="10">10 times table</option>
+                </select>
+            </div>
+            
+            <div class="score-display">
+                Score: <span id="score">0</span> | Questions: <span id="question-count">0</span>
+            </div>
+            
+            <div class="table-grid" id="table-grid">
+                <!-- Table items will be added by JavaScript -->
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" id="auto-practice-btn">Auto Practice</button>
+                <button class="control-btn" id="stop-auto-practice">Stop</button>
+                <button class="control-btn" id="start-quiz">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quiz Page -->
+    <div id="quiz-page" class="page hidden">
+        <div class="game-container">
+            <h1>Times Table Quiz</h1>
+            <div class="subtitle">Test your knowledge!</div>
+            
+            <div class="score-display">
+                Score: <span id="quiz-score">0</span> | Questions: <span id="quiz-question-count">0</span>
+            </div>
+            
+            <div class="question" id="question">2 × 1 = ?</div>
+            
+            <div class="answer-section">
+                <input type="number" class="answer-input" id="answer-input" min="0" max="100">
+                <button class="control-btn check-btn" id="check-btn">Check</button>
+                <button class="control-btn hint-btn" id="hint-btn">Hint</button>
+            </div>
+            
+            <div class="hint-options hidden" id="hint-options"></div>
+            
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="controls">
+                <button class="control-btn" id="next-question">Next</button>
+                <button class="control-btn" id="back-to-practice">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="correct-sound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_d5d01bc031.mp3"></audio>
+    <audio id="wrong-sound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_39b5f497b1.mp3"></audio>
+
+    <script>
+        // Game variables
+        let score = 0;
+        let questionCount = 0;
+        let currentQuestionIndex = 0;
+        let autoPracticeInterval = null;
+        let currentAutoIndex = 0;
+        let isAutoPracticing = false;
+        let quizQuestions = [];
+        let currentTable = 2;
+        let timesTables = {};
+        
+        // DOM elements
+        const practicePage = document.getElementById('practice-page');
+        const quizPage = document.getElementById('quiz-page');
+        const tableGrid = document.getElementById('table-grid');
+        const tableSelect = document.getElementById('table-select');
+        const startQuizBtn = document.getElementById('start-quiz');
+        const questionElement = document.getElementById('question');
+        const answerInput = document.getElementById('answer-input');
+        const checkBtn = document.getElementById('check-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const hintOptions = document.getElementById('hint-options');
+        const feedbackElement = document.getElementById('feedback');
+        const nextQuestionBtn = document.getElementById('next-question');
+        const backToPracticeBtn = document.getElementById('back-to-practice');
+        const scoreElement = document.getElementById('score');
+        const questionCountElement = document.getElementById('question-count');
+        const quizScoreElement = document.getElementById('quiz-score');
+        const quizQuestionCountElement = document.getElementById('quiz-question-count');
+        const correctSound = document.getElementById('correct-sound');
+        const wrongSound = document.getElementById('wrong-sound');
+        const autoPracticeBtn = document.getElementById('auto-practice-btn');
+        const stopAutoPracticeBtn = document.getElementById('stop-auto-practice');
+        const tableItems = [];
+        
+        // Initialize times tables (2-10)
+        function initTimesTables() {
+            for (let table = 2; table <= 10; table++) {
+                timesTables[table] = [];
+                for (let i = 1; i <= 10; i++) {
+                    timesTables[table].push({
+                        display: `${table} × ${i} = ${table * i}`,
+                        question: `${table} ${i === 1 ? 'one is' : i === 2 ? 'twos are' : i === 3 ? 'threes are' : i === 4 ? 'fours are' : i === 5 ? 'fives are' : i === 6 ? 'sixes are' : i === 7 ? 'sevens are' : i === 8 ? 'eights are' : i === 9 ? 'nines are' : 'tens are'}`,
+                        answer: table * i
+                    });
+                }
+            }
+        }
+        
+        // Set lower volume for sound effects
+        correctSound.volume = 0.3;
+        wrongSound.volume = 0.3;
+        
+        // Initialize the game
+        function initGame() {
+            initTimesTables();
+            createTableGrid();
+            
+            // Event listeners
+            tableSelect.addEventListener('change', function() {
+                currentTable = parseInt(this.value);
+                createTableGrid();
+                stopAutoPractice();
+            });
+            
+            startQuizBtn.addEventListener('click', startQuiz);
+            checkBtn.addEventListener('click', checkAnswer);
+            hintBtn.addEventListener('click', showHintOptions);
+            nextQuestionBtn.addEventListener('click', nextQuestion);
+            backToPracticeBtn.addEventListener('click', backToPractice);
+            autoPracticeBtn.addEventListener('click', startAutoPractice);
+            stopAutoPracticeBtn.addEventListener('click', stopAutoPractice);
+            answerInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+        }
+        
+        // Create the times table grid for practice
+        function createTableGrid() {
+            tableGrid.innerHTML = '';
+            const currentTimesTable = timesTables[currentTable];
+            
+            currentTimesTable.forEach((item, index) => {
+                const tableItem = document.createElement('div');
+                tableItem.className = 'table-item';
+                tableItem.textContent = item.display;
+                tableItem.addEventListener('click', function() {
+                    speakPracticeItem(index);
+                });
+                tableGrid.appendChild(tableItem);
+                tableItems.push(tableItem);
+            });
+        }
+        
+        // Speak a practice item with highlight
+        function speakPracticeItem(index) {
+            resetSpeech();
+            const currentTimesTable = timesTables[currentTable];
+            const item = currentTimesTable[index];
+            
+            // Remove highlight from all items
+            tableItems.forEach(item => item.classList.remove('highlight'));
+            
+            // Highlight current item
+            tableItems[index].classList.add('highlight');
+            
+            // Speak the item
+            speak(`${item.question} ${item.answer}`);
+            
+            // Add bounce animation
+            tableItems[index].classList.add('bounce');
+            setTimeout(() => {
+                tableItems[index].classList.remove('bounce');
+            }, 500);
+        }
+        
+        // Start auto practice mode
+        function startAutoPractice() {
+            if (isAutoPracticing) return;
+            
+            isAutoPracticing = true;
+            autoPracticeBtn.style.display = 'none';
+            stopAutoPracticeBtn.style.display = 'inline-block';
+            currentAutoIndex = 0;
+            
+            const currentTimesTable = timesTables[currentTable];
+            
+            // Welcome message for kids
+            speak(`Hello kids! Let's practice the ${currentTable} times table together! Ready? Here we go!`, 0.9, 1.5, () => {
+                if (!isAutoPracticing) return;
+                
+                speakPracticeItem(currentAutoIndex);
+                
+                // Set up interval for auto practice
+                autoPracticeInterval = setInterval(() => {
+                    if (!isAutoPracticing) {
+                        clearInterval(autoPracticeInterval);
+                        return;
+                    }
+                    
+                    currentAutoIndex++;
+                    if (currentAutoIndex >= currentTimesTable.length) {
+                        currentAutoIndex = 0;
+                        clearInterval(autoPracticeInterval);
+                        
+                        // Add encouraging message when looping
+                        speak("Great job! Let's do it again!", 0.9, 1.5, () => {
+                            if (!isAutoPracticing) return;
+                            speakPracticeItem(currentAutoIndex);
+                            
+                            // Restart the interval
+                            autoPracticeInterval = setInterval(() => {
+                                if (!isAutoPracticing) {
+                                    clearInterval(autoPracticeInterval);
+                                    return;
+                                }
+                                
+                                currentAutoIndex++;
+                                if (currentAutoIndex >= currentTimesTable.length) {
+                                    currentAutoIndex = 0;
+                                    clearInterval(autoPracticeInterval);
+                                    speak("Great job! Let's do it again!", 0.9, 1.5, () => {
+                                        if (!isAutoPracticing) return;
+                                        speakPracticeItem(currentAutoIndex);
+                                        autoPracticeInterval = setInterval(arguments.callee, 3000);
+                                    });
+                                } else {
+                                    speakPracticeItem(currentAutoIndex);
+                                }
+                            }, 3000);
+                        });
+                    } else {
+                        speakPracticeItem(currentAutoIndex);
+                    }
+                }, 3000);
+            });
+        }
+        
+        // Stop auto practice mode immediately
+        function stopAutoPractice() {
+            isAutoPracticing = false;
+            if (autoPracticeInterval) {
+                clearInterval(autoPracticeInterval);
+                autoPracticeInterval = null;
+            }
+            autoPracticeBtn.style.display = 'inline-block';
+            stopAutoPracticeBtn.style.display = 'none';
+            
+            // Remove highlight from all items
+            tableItems.forEach(item => item.classList.remove('highlight'));
+            
+            // Reset speech
+            resetSpeech();
+        }
+        
+        // Start the quiz mode
+        function startQuiz() {
+            stopAutoPractice();
+            practicePage.classList.add('hidden');
+            quizPage.classList.remove('hidden');
+            score = 0;
+            questionCount = 0;
+            currentQuestionIndex = 0;
+            quizScoreElement.textContent = score;
+            quizQuestionCountElement.textContent = questionCount;
+            
+            // Create randomized quiz questions
+            quizQuestions = [...timesTables[currentTable]];
+            shuffleArray(quizQuestions);
+            
+            // Play quiz start message
+            speak(`Kids, get ready for the ${currentTable} times table quiz! Let's begin!`, 0.9, 1.5, () => {
+                showQuestion();
+            });
+        }
+        
+        // Show current question
+        function showQuestion() {
+            const question = quizQuestions[currentQuestionIndex];
+            questionElement.textContent = `${question.display.split('=')[0]}= ?`;
+            answerInput.value = '';
+            feedbackElement.textContent = '';
+            feedbackElement.className = 'feedback';
+            hintOptions.classList.add('hidden');
+            answerInput.focus();
+            speak(`${question.question}?`);
+        }
+        
+        // Show hint options
+        function showHintOptions() {
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            const correctAnswer = currentQuestion.answer;
+            
+            // Create 2 wrong answers
+            let wrongAnswers = [];
+            while (wrongAnswers.length < 2) {
+                const randomAnswer = Math.floor(Math.random() * (currentTable * 10)) + 1;
+                if (randomAnswer !== correctAnswer && !wrongAnswers.includes(randomAnswer)) {
+                    wrongAnswers.push(randomAnswer);
+                }
+            }
+            
+            // Combine with correct answer and shuffle
+            let options = [correctAnswer, ...wrongAnswers];
+            shuffleArray(options);
+            
+            // Display options
+            hintOptions.innerHTML = '';
+            options.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'hint-option';
+                optionElement.textContent = option;
+                optionElement.addEventListener('click', () => {
+                    answerInput.value = option;
+                    hintOptions.classList.add('hidden');
+                });
+                hintOptions.appendChild(optionElement);
+            });
+            
+            hintOptions.classList.remove('hidden');
+        }
+        
+        // Check the answer
+        function checkAnswer() {
+            const userAnswer = parseInt(answerInput.value);
+            const correctAnswer = quizQuestions[currentQuestionIndex].answer;
+            
+            if (isNaN(userAnswer)) {
+                feedbackElement.textContent = 'Please enter a number';
+                feedbackElement.className = 'feedback incorrect';
+                return;
+            }
+            
+            questionCount++;
+            quizQuestionCountElement.textContent = questionCount;
+            
+            if (userAnswer === correctAnswer) {
+                // Correct answer
+                feedbackElement.textContent = `Correct! ${quizQuestions[currentQuestionIndex].display}`;
+                feedbackElement.className = 'feedback correct';
+                score++;
+                quizScoreElement.textContent = score;
+                correctSound.play();
+                speak(`Yes! ${quizQuestions[currentQuestionIndex].question} ${correctAnswer}`);
+            } else {
+                // Incorrect answer
+                feedbackElement.textContent = `Oops! ${quizQuestions[currentQuestionIndex].display}`;
+                feedbackElement.className = 'feedback incorrect';
+                wrongSound.play();
+                speak(`${quizQuestions[currentQuestionIndex].question} ${correctAnswer}`);
+            }
+            
+            hintOptions.classList.add('hidden');
+        }
+        
+        // Move to next question
+        function nextQuestion() {
+            // Stop any playing sounds immediately
+            correctSound.pause();
+            correctSound.currentTime = 0;
+            wrongSound.pause();
+            wrongSound.currentTime = 0;
+            
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= quizQuestions.length) {
+                currentQuestionIndex = 0;
+                // Shuffle again when we've gone through all questions
+                shuffleArray(quizQuestions);
+            }
+            showQuestion();
+        }
+        
+        // Go back to practice mode
+        function backToPractice() {
+            // Stop any playing sounds
+            correctSound.pause();
+            correctSound.currentTime = 0;
+            wrongSound.pause();
+            wrongSound.currentTime = 0;
+            
+            quizPage.classList.add('hidden');
+            practicePage.classList.remove('hidden');
+            resetSpeech();
+        }
+        
+        // Reset any ongoing speech
+        function resetSpeech() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            correctSound.pause();
+            correctSound.currentTime = 0;
+            wrongSound.pause();
+            wrongSound.currentTime = 0;
+        }
+        
+        // Text-to-speech function with callback support
+        function speak(text, rate = 0.9, volume = 1.5, onEnd) {
+            if ('speechSynthesis' in window) {
+                const speech = new SpeechSynthesisUtterance();
+                speech.text = text;
+                speech.volume = volume;
+                speech.rate = rate;
+                speech.lang = 'en-US';
+                
+                if (onEnd) {
+                    speech.onend = onEnd;
+                }
+                
+                window.speechSynthesis.speak(speech);
+            } else if (onEnd) {
+                onEnd();
+            }
+        }
+        
+        // Shuffle array function
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>

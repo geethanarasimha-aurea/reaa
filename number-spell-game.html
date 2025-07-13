@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Counting Game</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #ff6b6b;
+        }
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .number-btn {
+            padding: 15px;
+            font-size: 24px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .number-btn:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+        .current-number {
+            font-size: 72px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #2c3e50;
+            min-height: 90px;
+        }
+        .spelling-container {
+            min-height: 120px;
+            margin: 20px 0;
+        }
+        .spelling-word {
+            font-size: 36px;
+            color: #9b59b6;
+            margin: 10px 0;
+        }
+        .spelling-letters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 15px 0;
+        }
+        .letter {
+            font-size: 32px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .letter.active {
+            background-color: #f39c12;
+            color: white;
+            transform: scale(1.2);
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        .control-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 0 10px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .control-btn:hover {
+            background-color: #27ae60;
+        }
+        .control-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .progress {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin: 15px 0;
+        }
+        .sound-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+        }
+        .bounce {
+            animation: bounce 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <button class="sound-toggle" id="sound-toggle">🔊</button>
+    <div class="game-container">
+        <h1>Number Counting Game <span>🔢</span></h1>
+        <div class="progress">Progress: <span id="current-range">1-10</span> of 1000</div>
+        
+        <div class="current-number" id="current-number"></div>
+        
+        <div class="spelling-container">
+            <div class="spelling-word" id="spelling-word"></div>
+            <div class="spelling-letters" id="spelling-letters"></div>
+        </div>
+        
+        <div class="number-grid" id="number-grid"></div>
+        
+        <div class="controls">
+            <button class="control-btn" id="prev-btn">Previous 10</button>
+            <button class="control-btn" id="next-btn">Next 10</button>
+        </div>
+    </div>
+
+    <script>
+        let currentRangeStart = 1;
+        let soundEnabled = true;
+        let currentLetters = [];
+        let currentLetterIndex = 0;
+        const numberWords = {
+            1: 'ONE', 2: 'TWO', 3: 'THREE', 4: 'FOUR', 5: 'FIVE',
+            6: 'SIX', 7: 'SEVEN', 8: 'EIGHT', 9: 'NINE', 10: 'TEN',
+            11: 'ELEVEN', 12: 'TWELVE', 13: 'THIRTEEN', 14: 'FOURTEEN', 15: 'FIFTEEN',
+            16: 'SIXTEEN', 17: 'SEVENTEEN', 18: 'EIGHTEEN', 19: 'NINETEEN', 20: 'TWENTY',
+            30: 'THIRTY', 40: 'FORTY', 50: 'FIFTY', 60: 'SIXTY', 70: 'SEVENTY',
+            80: 'EIGHTY', 90: 'NINETY', 100: 'ONE HUNDRED', 200: 'TWO HUNDRED',
+            300: 'THREE HUNDRED', 400: 'FOUR HUNDRED', 500: 'FIVE HUNDRED',
+            600: 'SIX HUNDRED', 700: 'SEVEN HUNDRED', 800: 'EIGHT HUNDRED',
+            900: 'NINE HUNDRED', 1000: 'ONE THOUSAND'
+        };
+
+        // DOM elements
+        const currentNumberEl = document.getElementById('current-number');
+        const spellingWordEl = document.getElementById('spelling-word');
+        const spellingLettersEl = document.getElementById('spelling-letters');
+        const numberGridEl = document.getElementById('number-grid');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const currentRangeEl = document.getElementById('current-range');
+        const soundToggle = document.getElementById('sound-toggle');
+
+        // Initialize game
+        function initGame() {
+            updateNumberDisplay(false); // Don't auto-speak on init
+            createNumberButtons();
+        }
+
+        // Speak number with spelling animation
+        function speakNumber(number) {
+            if (!soundEnabled) return;
+            
+            const word = getNumberWord(number);
+            spellingWordEl.textContent = word;
+            
+            // Clear previous letters
+            spellingLettersEl.innerHTML = '';
+            currentLetters = word.split('').filter(c => c !== ' ' && c !== '-');
+            currentLetterIndex = 0;
+            
+            // Create letter elements
+            currentLetters.forEach(letter => {
+                const letterEl = document.createElement('div');
+                letterEl.className = 'letter';
+                letterEl.textContent = letter;
+                spellingLettersEl.appendChild(letterEl);
+            });
+            
+            // First say the number
+            speak(number.toString(), () => {
+                // Then spell it letter by letter
+                spellLetters();
+            });
+        }
+
+        function spellLetters() {
+            if (currentLetterIndex >= currentLetters.length) {
+                // Finally say the complete word
+                speak(spellingWordEl.textContent.toLowerCase());
+                return;
+            }
+            
+            // Highlight current letter
+            const letterEls = document.querySelectorAll('.letter');
+            letterEls.forEach(el => el.classList.remove('active', 'bounce'));
+            letterEls[currentLetterIndex].classList.add('active', 'bounce');
+            
+            // Speak current letter
+            speak(currentLetters[currentLetterIndex], () => {
+                currentLetterIndex++;
+                setTimeout(spellLetters, 500); // Slight pause between letters
+            });
+        }
+
+        function speak(text, callback) {
+            if ('speechSynthesis' in window && soundEnabled) {
+                window.speechSynthesis.cancel();
+                
+                const speech = new SpeechSynthesisUtterance();
+                speech.text = text;
+                speech.volume = 1;
+                speech.rate = text.length === 1 ? 0.6 : 0.8; // Slower for single letters
+                
+                if (callback) {
+                    speech.onend = callback;
+                }
+                
+                window.speechSynthesis.speak(speech);
+            } else if (callback) {
+                callback();
+            }
+        }
+
+        // Get the word for a number
+        function getNumberWord(num) {
+            if (numberWords[num]) return numberWords[num];
+            
+            if (num < 100) {
+                const tens = Math.floor(num / 10) * 10;
+                const ones = num % 10;
+                return `${numberWords[tens]}-${numberWords[ones]}`;
+            } else if (num < 1000) {
+                const hundreds = Math.floor(num / 100) * 100;
+                const remainder = num % 100;
+                if (remainder === 0) return numberWords[hundreds];
+                return `${numberWords[hundreds]} ${getNumberWord(remainder)}`;
+            }
+            return num.toString();
+        }
+
+        // Update number display
+        function updateNumberDisplay(shouldSpeak = true, number = currentRangeStart) {
+            currentNumberEl.textContent = number;
+            const word = getNumberWord(number);
+            spellingWordEl.textContent = word;
+            
+            // Clear previous letters
+            spellingLettersEl.innerHTML = '';
+            currentLetters = word.split('').filter(c => c !== ' ' && c !== '-');
+            
+            // Create letter elements (without highlighting)
+            currentLetters.forEach(letter => {
+                const letterEl = document.createElement('div');
+                letterEl.className = 'letter';
+                letterEl.textContent = letter;
+                spellingLettersEl.appendChild(letterEl);
+            });
+            
+            if (shouldSpeak) {
+                speakNumber(number);
+            }
+        }
+
+        // Create number buttons for current range
+        function createNumberButtons() {
+            numberGridEl.innerHTML = '';
+            const end = Math.min(currentRangeStart + 9, 1000);
+            currentRangeEl.textContent = `${currentRangeStart}-${end}`;
+            
+            for (let i = currentRangeStart; i <= end; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'number-btn';
+                btn.textContent = i;
+                btn.addEventListener('click', () => {
+                    updateNumberDisplay(true, i); // Speak when number is clicked
+                });
+                numberGridEl.appendChild(btn);
+            }
+            
+            // Disable prev button if at start
+            prevBtn.disabled = currentRangeStart === 1;
+            // Disable next button if at end
+            nextBtn.disabled = currentRangeStart >= 991;
+        }
+
+        // Navigate to previous 10 numbers
+        prevBtn.addEventListener('click', () => {
+            currentRangeStart = Math.max(1, currentRangeStart - 10);
+            createNumberButtons();
+            updateNumberDisplay(false); // Don't speak on navigation
+        });
+
+        // Navigate to next 10 numbers
+        nextBtn.addEventListener('click', () => {
+            currentRangeStart = Math.min(991, currentRangeStart + 10);
+            createNumberButtons();
+            updateNumberDisplay(false); // Don't speak on navigation
+        });
+
+        // Toggle sound
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundToggle.textContent = soundEnabled ? "🔊" : "🔇";
+            window.speechSynthesis.cancel();
+        });
+
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>
