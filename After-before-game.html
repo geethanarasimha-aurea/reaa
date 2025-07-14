@@ -127,20 +127,19 @@
             margin: 10px 0;
             display: flex;
             justify-content: center;
-            gap: 5px;
+            gap: 8px;
             flex-wrap: wrap;
         }
         .game-type-btn {
             background-color: #3498db;
-            padding: 6px 10px;
-            font-size: 0.9rem;
+            padding: 8px 12px;
+            font-size: 1rem;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            flex: 1;
-            min-width: 60px;
+            min-width: 70px;
         }
         .game-type-btn.active {
             background-color: #2980b9;
@@ -160,15 +159,17 @@
             background-color: #9b59b6;
         }
         .next-btn {
-            padding: 8px 15px;
-            font-size: 0.9rem;
+            padding: 10px 20px;
+            font-size: 1rem;
             background-color: #9b59b6;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            margin: 3px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
         }
         .next-btn:hover {
             background-color: #8e44ad;
@@ -201,15 +202,17 @@
             z-index: 2;
         }
         .hint-btn {
-            padding: 8px 15px;
-            font-size: 0.9rem;
+            padding: 10px 20px;
+            font-size: 1rem;
             background-color: #f39c12;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            margin: 3px;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
         }
         .hint-btn:hover {
             background-color: #e67e22;
@@ -245,7 +248,7 @@
             font-weight: bold;
         }
         .speak-btn {
-            padding: 6px 10px;
+            padding: 8px 15px;
             font-size: 0.9rem;
             background-color: #3498db;
             color: white;
@@ -253,7 +256,7 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            margin: 3px;
+            margin: 5px;
         }
         .speak-btn:hover {
             background-color: #2980b9;
@@ -316,9 +319,10 @@
         
         <div class="button-group">
             <button class="speak-btn" id="speak-question">🔊 Read</button>
-            <button class="hint-btn" id="hint-btn">💡 Hint</button>
-            <button class="next-btn" id="next-btn">Next</button>
         </div>
+        
+        <button class="hint-btn" id="hint-btn">💡 Hint</button>
+        <button class="next-btn" id="next-btn">Next</button>
     </div>
 
     <audio id="correct-sound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_d5d01bc031.mp3"></audio>
