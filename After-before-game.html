@@ -2,74 +2,88 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Number Finding Game for Kids</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: 'Comic Sans MS', cursive, sans-serif;
             text-align: center;
             background-color: #f0f8ff;
-            padding: 20px;
+            padding: 10px;
             position: relative;
             overflow: hidden;
+            height: 100vh;
+            width: 100vw;
         }
         .game-container {
-            max-width: 600px;
+            max-width: 100%;
             margin: 0 auto;
             background-color: white;
-            padding: 20px;
+            padding: 15px;
             border-radius: 15px;
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
             position: relative;
             z-index: 1;
+            height: calc(100vh - 20px);
+            display: flex;
+            flex-direction: column;
         }
         h1 {
             color: #ff6b6b;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
         }
         .question-text {
-            font-size: 24px;
-            margin: 10px 0;
+            font-size: 1.1rem;
+            margin: 5px 0;
             color: #2c3e50;
+            min-height: 2.2rem;
         }
         .number-line {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
-            margin: 20px 0;
-            font-size: 32px;
+            gap: 5px;
+            margin: 10px 0;
+            font-size: 1.5rem;
+            flex-wrap: wrap;
         }
         .number-display {
             font-weight: bold;
             color: #3498db;
         }
         .answer-display {
-            width: 80px;
-            height: 60px;
-            font-size: 32px;
+            width: 60px;
+            height: 50px;
+            font-size: 1.5rem;
             text-align: center;
             border: 3px solid #3498db;
             border-radius: 10px;
             background-color: #f8f8f8;
-            line-height: 60px;
+            line-height: 50px;
         }
         .hint-options {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
+            gap: 8px;
+            margin: 10px 0;
             flex-wrap: wrap;
         }
         .hint-number {
-            width: 80px;
-            height: 80px;
-            font-size: 36px;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
             text-align: center;
             border: 3px solid #3498db;
             border-radius: 10px;
             cursor: pointer;
             background-color: #f8f8f8;
-            line-height: 80px;
+            line-height: 60px;
             transition: all 0.3s;
         }
         .hint-number:hover {
@@ -77,12 +91,12 @@
             transform: scale(1.05);
         }
         .feedback {
-            font-size: 22px;
+            font-size: 1.1rem;
             font-weight: bold;
-            min-height: 30px;
-            margin: 15px 0;
+            min-height: 1.5rem;
+            margin: 8px 0;
             position: relative;
-            height: 40px;
+            height: 1.5rem;
         }
         .correct {
             color: #27ae60;
@@ -91,55 +105,70 @@
             color: #e74c3c;
         }
         .score {
-            font-size: 20px;
-            margin: 15px 0;
+            font-size: 1rem;
+            margin: 8px 0;
             color: #9b59b6;
         }
         .difficulty {
-            margin: 15px 0;
+            margin: 8px 0;
+            font-size: 0.9rem;
         }
         select {
-            padding: 8px;
-            font-size: 16px;
+            padding: 6px;
+            font-size: 0.9rem;
             border-radius: 5px;
             width: 100%;
-            max-width: 300px;
+            max-width: 200px;
         }
         .emoji {
-            font-size: 24px;
+            font-size: 1.2rem;
         }
         .game-type-selector {
-            margin: 20px 0;
+            margin: 10px 0;
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 5px;
             flex-wrap: wrap;
         }
         .game-type-btn {
             background-color: #3498db;
-            padding: 10px 20px;
-            font-size: 18px;
+            padding: 6px 10px;
+            font-size: 0.9rem;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
+            flex: 1;
+            min-width: 60px;
         }
         .game-type-btn.active {
             background-color: #2980b9;
             transform: scale(1.05);
             box-shadow: 0 0 5px rgba(0,0,0,0.2);
         }
+        .game-type-btn[data-type="before"].active {
+            background-color: #e74c3c;
+        }
+        .game-type-btn[data-type="after"].active {
+            background-color: #2ecc71;
+        }
+        .game-type-btn[data-type="middle"].active {
+            background-color: #f39c12;
+        }
+        .game-type-btn[data-type="all"].active {
+            background-color: #9b59b6;
+        }
         .next-btn {
-            padding: 10px 20px;
-            font-size: 18px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
             background-color: #9b59b6;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            margin: 5px;
+            margin: 3px;
         }
         .next-btn:hover {
             background-color: #8e44ad;
@@ -148,7 +177,7 @@
         .falling-emoji {
             position: fixed;
             top: -50px;
-            font-size: 24px;
+            font-size: 1.2rem;
             z-index: 10;
             animation: fall linear forwards;
             pointer-events: none;
@@ -165,22 +194,22 @@
         }
         .sound-toggle {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 24px;
+            top: 15px;
+            right: 15px;
+            font-size: 1.2rem;
             cursor: pointer;
             z-index: 2;
         }
         .hint-btn {
-            padding: 10px 20px;
-            font-size: 18px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
             background-color: #f39c12;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            margin: 5px;
+            margin: 3px;
         }
         .hint-btn:hover {
             background-color: #e67e22;
@@ -189,20 +218,22 @@
         .hint-sequence {
             display: flex;
             justify-content: center;
-            gap: 5px;
-            margin: 15px 0;
+            gap: 3px;
+            margin: 10px 0;
             flex-wrap: wrap;
+            max-height: 100px;
+            overflow-y: auto;
         }
         .hint-seq-number {
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            font-size: 0.9rem;
             text-align: center;
             border: 2px solid #f39c12;
             border-radius: 8px;
             cursor: pointer;
             background-color: #fef9e7;
-            line-height: 50px;
+            line-height: 40px;
             transition: all 0.3s;
         }
         .hint-seq-number:hover {
@@ -214,15 +245,15 @@
             font-weight: bold;
         }
         .speak-btn {
-            padding: 8px 15px;
-            font-size: 16px;
+            padding: 6px 10px;
+            font-size: 0.9rem;
             background-color: #3498db;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            margin: 5px;
+            margin: 3px;
         }
         .speak-btn:hover {
             background-color: #2980b9;
@@ -230,8 +261,14 @@
         .button-group {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 5px;
             flex-wrap: wrap;
+            margin-top: auto;
+        }
+        #hint-sequence-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: none;
         }
     </style>
 </head>
@@ -259,10 +296,10 @@
         </div>
         
         <div class="game-type-selector">
-            <button class="game-type-btn" data-type="before">Before</button>
+            <button class="game-type-btn active" data-type="before">Before</button>
             <button class="game-type-btn" data-type="after">After</button>
             <button class="game-type-btn" data-type="middle">Between</button>
-            <button class="game-type-btn active" data-type="all">All Types</button>
+            <button class="game-type-btn" data-type="all">All Types</button>
         </div>
         
         <div class="score">Score: <span id="score">0</span></div>
@@ -273,14 +310,14 @@
         
         <div class="feedback" id="feedback"></div>
         
-        <div id="hint-sequence-container" style="display: none;">
+        <div id="hint-sequence-container">
             <div class="hint-sequence" id="hint-sequence"></div>
         </div>
         
         <div class="button-group">
-            <button class="speak-btn" id="speak-question">🔊 Read Question</button>
-            <button class="hint-btn" id="hint-btn">💡 Show Hint</button>
-            <button class="next-btn" id="next-btn">Next Question</button>
+            <button class="speak-btn" id="speak-question">🔊 Read</button>
+            <button class="hint-btn" id="hint-btn">💡 Hint</button>
+            <button class="next-btn" id="next-btn">Next</button>
         </div>
     </div>
 
@@ -290,7 +327,7 @@
     <script>
         let score = 0;
         let currentQuestion = {};
-        let selectedGameType = "all";
+        let selectedGameType = "before";
         let soundEnabled = true;
         let questionCount = 1;
         const difficultySettings = {
@@ -381,7 +418,7 @@
             const emojis = ['❤️', '🌸', '⭐', '🌼', '✨', '🌺'];
             const screenWidth = window.innerWidth;
             
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 10; i++) {
                 const emoji = document.createElement('div');
                 emoji.className = 'falling-emoji';
                 emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
@@ -429,7 +466,7 @@
             }
             
             // Set question text
-            const questionText = `Question ${questionCount}: ${gameType.text}?`;
+            const questionText = `Q${questionCount}: ${gameType.text}?`;
             questionTextEl.textContent = questionText;
             
             // Clear and setup number line
