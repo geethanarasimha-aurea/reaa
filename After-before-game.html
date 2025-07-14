@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Number Finding Game for Kids</title>
     <style>
         * {
@@ -11,44 +11,42 @@
             padding: 0;
         }
         body {
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
             text-align: center;
             background-color: #f0f9ff;
-            background-image: radial-gradient(#b3e5fc 2px, transparent 2px);
-            background-size: 20px 20px;
             padding: 10px;
             position: relative;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            min-height: 100vh;
         }
         .game-container {
-            max-width: 100%;
+            max-width: 600px;
             margin: 0 auto;
             background-color: white;
-            padding: 15px;
+            padding: 20px;
             border-radius: 20px;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 1;
-            height: calc(100vh - 20px);
-            display: flex;
-            flex-direction: column;
             border: 4px solid #ff9e7d;
+            /* Scroll only on mobile */
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+        @media (min-width: 768px) {
+            .game-container {
+                max-height: none;
+                overflow-y: visible;
+            }
         }
         h1 {
             color: #ff6b6b;
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+            font-size: 24px;
+            margin-bottom: 15px;
         }
         .question-text {
-            font-size: 1.3rem;
-            margin: 10px 0;
+            font-size: 18px;
+            margin: 15px 0;
             color: #2c3e50;
-            min-height: 2.2rem;
             background-color: #f8f8f8;
-            padding: 10px;
+            padding: 15px;
             border-radius: 10px;
             border: 2px dashed #3498db;
         }
@@ -56,62 +54,57 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
-            margin: 15px 0;
-            font-size: 1.8rem;
+            gap: 15px;
+            margin: 20px 0;
+            font-size: 24px;
             flex-wrap: wrap;
         }
         .number-display {
             font-weight: bold;
             color: #3498db;
             background-color: #e3f2fd;
-            padding: 5px 15px;
+            padding: 10px 20px;
             border-radius: 10px;
             border: 2px solid #bbdefb;
         }
         .answer-display {
-            width: 70px;
-            height: 60px;
-            font-size: 1.8rem;
+            width: 80px;
+            height: 70px;
+            font-size: 24px;
             text-align: center;
             border: 3px solid #3498db;
             border-radius: 15px;
             background-color: #f8f8f8;
-            line-height: 60px;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+            line-height: 70px;
         }
         .hint-options {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin: 15px 0;
+            gap: 15px;
+            margin: 20px 0;
             flex-wrap: wrap;
         }
         .hint-number {
-            width: 70px;
-            height: 70px;
-            font-size: 1.8rem;
+            width: 80px;
+            height: 80px;
+            font-size: 24px;
             text-align: center;
             border: 3px solid #3498db;
             border-radius: 15px;
             cursor: pointer;
             background-color: #f8f8f8;
-            line-height: 70px;
-            transition: all 0.3s;
-            box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+            line-height: 80px;
+            transition: all 0.2s;
         }
         .hint-number:hover {
             background-color: #e8f4fc;
-            transform: translateY(-3px);
+            transform: scale(1.05);
         }
         .feedback {
-            font-size: 1.3rem;
+            font-size: 20px;
             font-weight: bold;
-            min-height: 1.5rem;
-            margin: 10px 0;
-            position: relative;
-            height: 1.5rem;
-            padding: 10px;
+            margin: 20px 0;
+            padding: 15px;
             border-radius: 10px;
         }
         .correct {
@@ -123,32 +116,29 @@
             background-color: #ffebee;
         }
         .score {
-            font-size: 1.2rem;
-            margin: 10px 0;
+            font-size: 18px;
+            margin: 15px 0;
             color: #9b59b6;
             background-color: #f3e5f5;
-            padding: 8px;
+            padding: 10px;
             border-radius: 20px;
             display: inline-block;
         }
         .difficulty {
-            margin: 10px 0;
-            font-size: 1rem;
+            margin: 15px 0;
+            font-size: 16px;
         }
         select {
-            padding: 8px;
-            font-size: 1rem;
+            padding: 10px;
+            font-size: 16px;
             border-radius: 10px;
             width: 100%;
-            max-width: 250px;
+            max-width: 300px;
             border: 2px solid #3498db;
             background-color: #e3f2fd;
         }
-        .emoji {
-            font-size: 1.5rem;
-        }
         .game-type-selector {
-            margin: 15px 0;
+            margin: 20px 0;
             display: flex;
             justify-content: center;
             gap: 10px;
@@ -156,19 +146,17 @@
         }
         .game-type-btn {
             background-color: #3498db;
-            padding: 10px 15px;
-            font-size: 1.1rem;
+            padding: 12px 18px;
+            font-size: 16px;
             color: white;
             border: none;
             border-radius: 15px;
             cursor: pointer;
-            transition: all 0.3s;
-            min-width: 80px;
-            box-shadow: 0 3px 0 rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            min-width: 90px;
         }
         .game-type-btn.active {
-            transform: translateY(3px);
-            box-shadow: none;
+            transform: translateY(2px);
         }
         .game-type-btn[data-type="before"].active {
             background-color: #e74c3c;
@@ -185,28 +173,26 @@
         .action-buttons {
             display: flex;
             justify-content: space-between;
-            gap: 10px;
-            margin-top: auto;
+            gap: 15px;
+            margin-top: 20px;
             padding: 10px 0;
         }
         .action-btn {
-            padding: 12px 15px;
-            font-size: 1.1rem;
+            padding: 15px;
+            font-size: 16px;
             color: white;
             border: none;
             border-radius: 15px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             flex: 1;
-            box-shadow: 0 3px 0 rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 8px;
         }
         .action-btn:active {
-            transform: translateY(3px);
-            box-shadow: none;
+            transform: translateY(2px);
         }
         .hint-btn {
             background-color: #f39c12;
@@ -219,14 +205,14 @@
         }
         .sound-toggle {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 1.5rem;
+            top: 20px;
+            right: 20px;
+            font-size: 20px;
             cursor: pointer;
             z-index: 2;
             background-color: white;
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -236,49 +222,35 @@
         .hint-sequence {
             display: flex;
             justify-content: center;
-            gap: 5px;
-            margin: 15px 0;
+            gap: 8px;
+            margin: 20px 0;
             flex-wrap: wrap;
-            max-height: 120px;
-            overflow-y: auto;
-            padding: 10px;
+            padding: 15px;
             background-color: #fff9c4;
             border-radius: 10px;
             border: 2px dashed #f39c12;
         }
         .hint-seq-number {
-            width: 50px;
-            height: 50px;
-            font-size: 1.2rem;
+            width: 60px;
+            height: 60px;
+            font-size: 18px;
             text-align: center;
             border: 2px solid #f39c12;
             border-radius: 10px;
             cursor: pointer;
             background-color: #fffde7;
-            line-height: 50px;
-            transition: all 0.3s;
+            line-height: 60px;
+            transition: all 0.2s;
         }
         .hint-seq-number:hover {
             background-color: #fff9c4;
-        }
-        .hint-seq-number.correct {
-            background-color: #d4edda;
-            border-color: #27ae60;
-            font-weight: bold;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        .celebrate {
-            animation: bounce 0.5s ease infinite;
         }
     </style>
 </head>
 <body>
     <div class="sound-toggle" id="sound-toggle">🔊</div>
     <div class="game-container">
-        <h1>Number Finding Game <span class="emoji">🔢</span></h1>
+        <h1>Number Finding Game <span>🔢</span></h1>
         
         <div class="difficulty">
             <label for="difficulty">Difficulty: </label>
@@ -328,11 +300,14 @@
     <audio id="wrong-sound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_39b5f497b1.mp3"></audio>
 
     <script>
+        // Game variables
         let score = 0;
         let currentQuestion = {};
         let selectedGameType = "before";
         let soundEnabled = true;
         let questionCount = 1;
+        
+        // Difficulty settings
         const difficultySettings = {
             beginner1: { min: 1, max: 20 },
             beginner2: { min: 1, max: 50 },
@@ -348,7 +323,14 @@
             legend: { min: 901, max: 1000 }
         };
 
-        // DOM elements
+        // Game types
+        const gameTypes = [
+            { type: 'before', text: 'What number comes before' },
+            { type: 'after', text: 'What number comes after' },
+            { type: 'middle', text: 'What number is between' }
+        ];
+
+        // Get DOM elements
         const questionTextEl = document.getElementById('question-text');
         const numberLineEl = document.getElementById('number-line');
         const hintOptionsEl = document.getElementById('hint-options');
@@ -365,18 +347,11 @@
         const hintSequenceEl = document.getElementById('hint-sequence');
         const speakQuestionBtn = document.getElementById('speak-question');
 
-        // Set lower volume for sound effects
+        // Set sound volume
         correctSound.volume = 0.3;
         wrongSound.volume = 0.3;
 
-        // Game types
-        const gameTypes = [
-            { type: 'before', text: 'What number comes before' },
-            { type: 'after', text: 'What number comes after' },
-            { type: 'middle', text: 'What number is between' }
-        ];
-
-        // Initialize game
+        // Initialize the game
         function initGame() {
             score = 0;
             questionCount = 1;
@@ -384,7 +359,7 @@
             generateQuestion();
         }
 
-        // Enhanced speak function with louder voice
+        // Speak text function
         function speak(text) {
             if ('speechSynthesis' in window) {
                 const speech = new SpeechSynthesisUtterance();
@@ -406,22 +381,21 @@
             window.speechSynthesis.cancel();
         }
 
-        // Toggle sound
-        soundToggle.addEventListener('click', () => {
-            soundEnabled = !soundEnabled;
-            soundToggle.textContent = soundEnabled ? "🔊" : "🔇";
-            if (!soundEnabled) stopAllSounds();
-        });
-
-        // Create celebration effect
-        function celebrate() {
-            feedbackEl.classList.add('celebrate');
-            setTimeout(() => {
-                feedbackEl.classList.remove('celebrate');
-            }, 1000);
+        // Generate a random number
+        function getRandomNumber(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // Generate question with full speech
+        // Shuffle an array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Generate a new question
         function generateQuestion() {
             stopAllSounds();
             
@@ -509,7 +483,7 @@
                 fullSpeechText += ` The number is between ${num1} and ${num3}`;
             }
             
-            // Speak the full question with context
+            // Speak the full question
             speak(fullSpeechText);
             
             // Generate hint options
@@ -567,7 +541,7 @@
             hintSequenceEl.innerHTML = '';
         }
 
-        // Show hint sequence
+        // Show hint sequence (without revealing correct answer)
         function showHintSequence() {
             hintSequenceContainer.style.display = 'block';
             hintSequenceEl.innerHTML = '';
@@ -582,7 +556,6 @@
             for (let i = start; i <= end; i++) {
                 const numEl = document.createElement('div');
                 numEl.className = 'hint-seq-number';
-                if (i === answer) numEl.classList.add('correct');
                 numEl.textContent = i;
                 numEl.addEventListener('click', () => {
                     speak(i.toString());
@@ -590,15 +563,15 @@
                 hintSequenceEl.appendChild(numEl);
             }
             
-            // Speak the hint instruction
-            speak(`Here's a hint. The correct number is between ${start} and ${end}. The green number is the correct answer.`);
+            // Speak the hint instruction without giving away answer
+            speak(`Here's a hint. Look for the number between ${start} and ${end}.`);
         }
 
+        // Check the answer
         function checkAnswer(selectedNumber) {
             if (selectedNumber === currentQuestion.answer) {
                 feedbackEl.textContent = 'Correct! 🎉';
                 feedbackEl.className = 'feedback correct';
-                celebrate();
                 score++;
                 scoreEl.textContent = score;
                 questionCount++;
@@ -637,19 +610,6 @@
             }
         }
 
-        // Helper functions
-        function getRandomNumber(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
         // Event listeners
         nextBtn.addEventListener('click', () => {
             stopAllSounds();
@@ -673,6 +633,12 @@
             if (currentQuestion.fullSpeechText) {
                 speak(currentQuestion.fullSpeechText);
             }
+        });
+
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundToggle.textContent = soundEnabled ? "🔊" : "🔇";
+            if (!soundEnabled) stopAllSounds();
         });
 
         // Start the game
